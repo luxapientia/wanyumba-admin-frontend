@@ -4,6 +4,19 @@ import axios from 'axios';
 // Default to admin microservice URL (port 3005)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api/v1';
 
+// Wanyumba frontend URL for redirecting unauthorized users
+const WANYUMBA_FRONTEND_URL = import.meta.env.VITE_WANYUMBA_FRONTEND_URL || 'http://localhost:3000';
+const LOGIN_PATH = '/auth/login';
+
+/**
+ * Redirect to wanyumba-frontend login page
+ */
+const redirectToLogin = () => {
+  const loginUrl = `${WANYUMBA_FRONTEND_URL}${LOGIN_PATH}`;
+  // Use window.location.href for full page redirect (clears React state)
+  window.location.href = loginUrl;
+};
+
 // Create axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -41,7 +54,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Unauthorized - clear token and redirect to login
       localStorage.removeItem('token');
-      // You can add redirect logic here if needed
+      // Redirect to wanyumba-frontend login page
+      redirectToLogin();
     }
 
     return Promise.reject(error);
