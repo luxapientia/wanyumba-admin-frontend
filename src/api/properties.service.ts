@@ -224,7 +224,7 @@ class PropertiesService {
     // Replace admin service port with inventory service port (3008)
     const inventoryServiceURL = baseURL.replace(':3005', ':3008');
     
-    // Call inventory management service directly
+    // Call inventory management service directly with credentials
     const response = await axios.get(
       `${inventoryServiceURL}/properties/${id}`,
       {
@@ -234,6 +234,7 @@ class PropertiesService {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           }),
         },
+        withCredentials: true, // REQUIRED: Send cookies in cross-origin requests
       }
     );
     return response.data;
