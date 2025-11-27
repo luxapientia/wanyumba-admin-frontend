@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -12,122 +14,75 @@ import {
   Zap,
   BarChart3,
   FileText,
-  Settings,
-  UserPlus
+  Home,
+  Bot,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import Button from '../../components/UI/Button.js';
+import { StatCard } from '../../components/UI/index.js';
+import { dashboardService } from '../../api/index.js';
+import type { DashboardStats } from '../../api/index.js';
+import { useToast } from '../../contexts/index.js';
+import { staggerContainer } from '../../utils/animations.js';
 
 export default function Dashboard() {
-  const stats = [
-    {
-      label: 'Total Users',
-      value: '1,234',
-      change: '+12.5%',
-      changeType: 'positive' as const,
-      icon: Users,
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      hoverColor: 'hover:shadow-blue-500/20',
-    },
-    {
-      label: 'Total Properties',
-      value: '5,678',
-      change: '+8.2%',
-      changeType: 'positive' as const,
-      icon: Database,
-      color: 'from-emerald-500 to-teal-500',
-      bgColor: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
-      hoverColor: 'hover:shadow-emerald-500/20',
-    },
-    {
-      label: 'Pending Approvals',
-      value: '23',
-      change: '-5.1%',
-      changeType: 'negative' as const,
-      icon: AlertCircle,
-      color: 'from-amber-500 to-orange-500',
-      bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      hoverColor: 'hover:shadow-amber-500/20',
-    },
-    {
-      label: 'Active Listings',
-      value: '4,521',
-      change: '+15.3%',
-      changeType: 'positive' as const,
-      icon: TrendingUp,
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      hoverColor: 'hover:shadow-purple-500/20',
-    },
-  ];
+  const navigate = useNavigate();
+  const { error: showError } = useToast();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const recentActivities = [
-    {
-      icon: UserPlus,
-      title: 'New user registered',
-      description: 'John Doe created an account',
-      time: '2 minutes ago',
-      color: 'bg-blue-100 text-blue-600',
-    },
-    {
-      icon: Database,
-      title: 'Property approved',
-      description: 'Property #1234 was approved',
-      time: '15 minutes ago',
-      color: 'bg-emerald-100 text-emerald-600',
-    },
-    {
-      icon: AlertCircle,
-      title: 'Pending review',
-      description: '3 properties need review',
-      time: '1 hour ago',
-      color: 'bg-amber-100 text-amber-600',
-    },
-    {
-      icon: Settings,
-      title: 'Settings updated',
-      description: 'System settings were modified',
-      time: '2 hours ago',
-      color: 'bg-purple-100 text-purple-600',
-    },
-  ];
+  const fetchStats = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      const data = await dashboardService.getStatistics();
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      showError('Error', 'Failed to load dashboard statistics');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-  const quickActions = [
-    {
-      icon: Users,
-      title: 'Manage Users',
-      description: 'View and edit user accounts',
-      color: 'from-indigo-500 to-purple-500',
-      bgColor: 'bg-indigo-50',
-      hoverBg: 'hover:bg-indigo-100',
-      textColor: 'text-indigo-900',
-      descColor: 'text-indigo-600',
-    },
-    {
-      icon: Database,
-      title: 'Review Properties',
-      description: 'Approve or reject listings',
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50',
-      hoverBg: 'hover:bg-purple-100',
-      textColor: 'text-purple-900',
-      descColor: 'text-purple-600',
-    },
-    {
-      icon: Settings,
-      title: 'System Settings',
-      description: 'Configure platform settings',
-      color: 'from-pink-500 to-rose-500',
-      bgColor: 'bg-pink-50',
-      hoverBg: 'hover:bg-pink-100',
-      textColor: 'text-pink-900',
-      descColor: 'text-pink-600',
-    },
-  ];
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleRefresh = () => {
+    fetchStats(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Failed to load dashboard data</p>
+          <Button onClick={handleRefresh} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -150,6 +105,17 @@ export default function Dashboard() {
         damping: 15,
       },
     },
+  };
+
+  // Calculate totals for display
+  const totalUsers = stats.users.total;
+  const totalProperties = stats.properties.total;
+  const totalScrapedListings = stats.scraper.totalListings;
+  const pendingApprovals = stats.properties.pending;
+
+  // Format numbers with commas
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat().format(num);
   };
 
   return (
@@ -185,197 +151,351 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, type: 'spring' }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 shadow-sm"
+              className="flex items-center gap-3"
             >
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
+              <Button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                variant="secondary"
+                leftIcon={<RefreshCw className={refreshing ? 'animate-spin' : ''} />}
               >
-                <CheckCircle className="w-5 h-5 text-indigo-600" />
-              </motion.div>
-              <span className="text-sm font-semibold text-indigo-900">System Operational</span>
+                Refresh
+              </Button>
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 shadow-sm">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <CheckCircle className="w-5 h-5 text-indigo-600" />
+                </motion.div>
+                <span className="text-sm font-semibold text-indigo-900">System Operational</span>
+              </div>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Stats Grid */}
+        {/* Main Stats Grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8"
         >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                variants={itemVariants}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className="group relative bg-white rounded-2xl shadow-sm border border-gray-200/50 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-              >
-                {/* Animated Gradient Accent */}
-                <motion.div
-                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color}`}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: index * 0.1 + 0.3, duration: 0.5 }}
-                />
-                
-                {/* Hover Glow Effect */}
-                <motion.div
-                  className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
-                />
+          {/* Total Users */}
+          <motion.div variants={itemVariants}>
+            <StatCard
+              title="Total Users"
+              value={formatNumber(totalUsers)}
+              icon={Users}
+              color="blue"
+              loading={loading}
+            />
+          </motion.div>
 
-                <div className="relative p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <motion.div
-                      className={`p-3 ${stat.bgColor} rounded-xl group-hover:scale-110 transition-transform duration-300`}
-                      whileHover={{ rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <Icon className={`w-6 h-6 ${stat.iconColor}`} />
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 + 0.5, type: 'spring' }}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold ${
-                        stat.changeType === 'positive'
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : 'bg-red-50 text-red-600'
-                      }`}
-                    >
-                      <ArrowUpRight
-                        size={12}
-                        className={stat.changeType === 'negative' ? 'rotate-180' : ''}
-                      />
-                      {stat.change}
-                    </motion.div>
-                  </div>
-                  <motion.h3
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: index * 0.1 + 0.4 }}
-                    className="text-3xl font-bold text-gray-900 mb-1"
-                  >
-                    {stat.value}
-                  </motion.h3>
-                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                </div>
-              </motion.div>
-            );
-          })}
+          {/* Total Properties */}
+          <motion.div variants={itemVariants}>
+            <StatCard
+              title="Total Properties"
+              value={formatNumber(totalProperties)}
+              icon={Database}
+              color="green"
+              loading={loading}
+            />
+          </motion.div>
+
+          {/* Pending Approvals */}
+          <motion.div variants={itemVariants}>
+            <StatCard
+              title="Pending Approvals"
+              value={formatNumber(pendingApprovals)}
+              icon={AlertCircle}
+              color="orange"
+              loading={loading}
+            />
+          </motion.div>
+
+          {/* Scraped Listings */}
+          <motion.div variants={itemVariants}>
+            <StatCard
+              title="Scraped Listings"
+              value={formatNumber(totalScrapedListings)}
+              icon={TrendingUp}
+              color="purple"
+              loading={loading}
+            />
+          </motion.div>
         </motion.div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Recent Activity */}
+        {/* Detailed Stats Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          {/* Users Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, type: 'spring' }}
-            className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6 sm:p-8"
+            transition={{ delay: 0.4 }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6"
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <Activity className="w-5 h-5 text-indigo-600" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Users className="w-5 h-5 text-blue-600" />
               </div>
+              <h2 className="text-xl font-bold text-gray-900">Users</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Active Users</span>
+                <span className="text-lg font-bold text-blue-600">{formatNumber(stats.users.active)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Inactive Users</span>
+                <span className="text-lg font-bold text-gray-600">{formatNumber(stats.users.inactive)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Verified</span>
+                <span className="text-lg font-bold text-green-600">{formatNumber(stats.users.verified)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Unverified</span>
+                <span className="text-lg font-bold text-amber-600">{formatNumber(stats.users.unverified)}</span>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              fullWidth
+              className="mt-4"
+              onClick={() => navigate('/users')}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <span>View All Users</span>
+                <ArrowUpRight size={16} className="ml-auto" />
+              </div>
+            </Button>
+          </motion.div>
+
+          {/* Properties Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Home className="w-5 h-5 text-green-600" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">Properties</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Active</span>
+                <span className="text-lg font-bold text-green-600">{formatNumber(stats.properties.active)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Pending</span>
+                <span className="text-lg font-bold text-amber-600">{formatNumber(stats.properties.pending)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Rejected</span>
+                <span className="text-lg font-bold text-red-600">{formatNumber(stats.properties.rejected)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Draft</span>
+                <span className="text-lg font-bold text-gray-600">{formatNumber(stats.properties.draft)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Sold/Rented</span>
+                <span className="text-lg font-bold text-purple-600">
+                  {formatNumber(stats.properties.sold + stats.properties.rented)}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-indigo-600 hover:text-indigo-700"
-                rightIcon={<ArrowUpRight size={14} />}
+                fullWidth
+                onClick={() => navigate('/properties/pending')}
               >
-                View All
+                <div className="flex items-center gap-2 w-full">
+                  <span>Pending</span>
+                  <ArrowUpRight size={16} className="ml-auto" />
+                </div>
               </Button>
-            </div>
-            <div className="space-y-3">
-              {recentActivities.map((activity, index) => {
-                const Icon = activity.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + index * 0.1 }}
-                    whileHover={{ x: 4 }}
-                    className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-transparent hover:from-indigo-50/50 hover:to-purple-50/50 rounded-xl transition-all duration-300 cursor-pointer group"
-                  >
-                    <motion.div
-                      className={`w-12 h-12 ${activity.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                      whileHover={{ rotate: [0, -5, 5, 0] }}
-                    >
-                      <Icon className="w-6 h-6" />
-                    </motion.div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 mb-0.5">
-                        {activity.title}
-                      </p>
-                      <p className="text-xs text-gray-600 truncate">{activity.description}</p>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Clock size={14} />
-                      <span>{activity.time}</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => navigate('/properties/all')}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <span>All Properties</span>
+                  <ArrowUpRight size={16} className="ml-auto" />
+                </div>
+              </Button>
             </div>
           </motion.div>
 
-          {/* Quick Actions */}
+          {/* Scraper Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, type: 'spring' }}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6 sm:p-8"
+            transition={{ delay: 0.6 }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Zap className="w-5 h-5 text-purple-600" />
+                <Bot className="w-5 h-5 text-purple-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+              <h2 className="text-xl font-bold text-gray-900">Scraper</h2>
             </div>
-            <div className="space-y-3">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    fullWidth
-                    className={`text-left px-4 py-4 ${action.bgColor} ${action.hoverBg} justify-start`}
-                    rightIcon={<ArrowUpRight size={16} className={`${action.textColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      <div className={`p-2 bg-gradient-to-r ${action.color} rounded-lg`}>
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className={`text-sm font-semibold ${action.textColor} mb-0.5`}>
-                          {action.title}
-                        </p>
-                        <p className={`text-xs ${action.descColor}`}>{action.description}</p>
-                      </div>
-                    </div>
-                  </Button>
-                );
-              })}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Total Listings</span>
+                <span className="text-lg font-bold text-purple-600">{formatNumber(stats.scraper.totalListings)}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Total Agents</span>
+                <span className="text-lg font-bold text-blue-600">{formatNumber(stats.scraper.totalAgents)}</span>
+              </div>
+              {/* Source breakdown */}
+              {Object.keys(stats.scraper.sources).length > 0 && (
+                <div className="pt-2 border-t border-gray-200">
+                  <p className="text-xs font-semibold text-gray-500 uppercase mb-2">By Source</p>
+                  <div className="space-y-2">
+                    {Object.entries(stats.scraper.sources).map(([source, count], index) => {
+                      const colorMap: Record<number, string> = {
+                        0: 'text-orange-600',
+                        1: 'text-teal-600',
+                        2: 'text-green-600',
+                        3: 'text-blue-600',
+                        4: 'text-purple-600',
+                      };
+                      const colorClass = colorMap[index % 5] || 'text-gray-600';
+                      const formattedName = source
+                        .split(/[-_]/)
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                      
+                      return (
+                        <div key={source} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                          <span className="text-xs font-medium text-gray-600">{formattedName}</span>
+                          <span className={`text-sm font-bold ${colorClass}`}>{formatNumber(count)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => navigate('/scraper/scrape')}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <span>Scrape Control</span>
+                  <ArrowUpRight size={16} className="ml-auto" />
+                </div>
+              </Button>
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => navigate('/scraper/listings')}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <span>Listings</span>
+                  <ArrowUpRight size={16} className="ml-auto" />
+                </div>
+              </Button>
             </div>
           </motion.div>
         </div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-200/50 p-6 sm:p-8"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Zap className="w-5 h-5 text-purple-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Button
+              variant="ghost"
+              fullWidth
+              className="text-left px-4 py-4 bg-indigo-50 hover:bg-indigo-100 justify-start group"
+              onClick={() => navigate('/users')}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <Users className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-indigo-900 mb-0.5">Manage Users</p>
+                  <p className="text-xs text-indigo-600">View and edit user accounts</p>
+                </div>
+                <ArrowUpRight size={16} className="text-indigo-600 flex-shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </div>
+            </Button>
+
+            <Button
+              variant="ghost"
+              fullWidth
+              className="text-left px-4 py-4 bg-purple-50 hover:bg-purple-100 justify-start group"
+              onClick={() => navigate('/properties/pending')}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <FileText className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-purple-900 mb-0.5">Review Properties</p>
+                  <p className="text-xs text-purple-600">Approve or reject listings</p>
+                </div>
+                <ArrowUpRight size={16} className="text-purple-600 flex-shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </div>
+            </Button>
+
+            <Button
+              variant="ghost"
+              fullWidth
+              className="text-left px-4 py-4 bg-green-50 hover:bg-green-100 justify-start group"
+              onClick={() => navigate('/scraper/scrape')}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <Bot className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-green-900 mb-0.5">Scrape Control</p>
+                  <p className="text-xs text-green-600">Manage scraping operations</p>
+                </div>
+                <ArrowUpRight size={16} className="text-green-600 flex-shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </div>
+            </Button>
+
+            <Button
+              variant="ghost"
+              fullWidth
+              className="text-left px-4 py-4 bg-blue-50 hover:bg-blue-100 justify-start group"
+              onClick={() => navigate('/scraper/listings')}
+            >
+              <div className="flex items-center gap-3 w-full">
+                <Database className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-blue-900 mb-0.5">View Listings</p>
+                  <p className="text-xs text-blue-600">Browse scraped properties</p>
+                </div>
+                <ArrowUpRight size={16} className="text-blue-600 flex-shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </div>
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
 }
-

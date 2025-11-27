@@ -2,6 +2,7 @@ export { default as apiClient } from './axios.js';
 export { default as propertiesService } from './properties.service.js';
 export { default as userService } from './user.service.js';
 export { default as scraperService } from './scraper.service.js';
+export { default as dashboardService } from './dashboard.service.js';
 export type {
   Property,
   PropertyFilters,
@@ -17,9 +18,6 @@ export type {
   UserFilters, 
   CreateUserDto, 
   UpdateUserDto,
-  Role,
-  RolesResponse,
-  ChangePasswordDto,
 } from './user.service.js';
 export type {
   // Scraping Types
@@ -43,4 +41,8 @@ export type {
   ScraperStatus,
   HealthResponse,
 } from './scraper.service.js';
+export type {
+  DashboardStats,
+  DashboardResponse,
+} from './dashboard.service.js';
 
