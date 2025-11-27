@@ -5,6 +5,7 @@ import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { PendingProperties, AllProperties } from './pages/Properties';
 import PropertyDetail from './pages/Properties/PropertyDetail';
+import { Users, UserDetail } from './pages/Users';
 
 function App() {
   return (
@@ -15,12 +16,10 @@ function App() {
             <Route index element={<Dashboard />} />
             
             {/* Users Routes */}
-            <Route path="users" element={
-              <div className="p-8">
-                <h1 className="text-2xl font-bold">Users Management</h1>
-                <p className="text-gray-600">Coming soon...</p>
-              </div>
-            } />
+            <Route path="users">
+              <Route index element={<Users />} />
+              <Route path=":id" element={<UserDetail />} />
+            </Route>
             
             {/* Properties Routes */}
             <Route path="properties">
@@ -29,14 +28,6 @@ function App() {
               <Route path=":id" element={<PropertyDetail />} />
               <Route index element={<Navigate to="/properties/all" replace />} />
             </Route>
-            
-            {/* Settings Routes */}
-            <Route path="settings" element={
-              <div className="p-8">
-                <h1 className="text-2xl font-bold">Settings</h1>
-                <p className="text-gray-600">Coming soon...</p>
-              </div>
-            } />
             
             {/* 404 - Redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />

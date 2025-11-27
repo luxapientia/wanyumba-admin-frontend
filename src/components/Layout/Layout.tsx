@@ -1,9 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
+import { fetchRoles } from '../../store/thunks/rolesThunks.js';
 import Header from './Header';
 
 const Layout = () => {
+  const dispatch = useAppDispatch();
+  const { items: roles, loading: rolesLoading } = useAppSelector((state) => state.roles);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Fetch roles on mount if not already loaded
+  useEffect(() => {
+    if (roles.length === 0 && !rolesLoading) {
+      dispatch(fetchRoles());
+    }
+  }, [dispatch, roles.length, rolesLoading]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);

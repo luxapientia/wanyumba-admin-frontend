@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, User, Home, Shield, Settings, LogOut, Menu, X, ChevronDown, Mail, Phone, UserCircle } from 'lucide-react';
+import { Bell, User, Home, Shield, LogOut, Menu, X, ChevronDown, Mail, Phone, UserCircle } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
 import { fetchCurrentUser } from '../../store/thunks/userThunks.js';
@@ -26,6 +26,7 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
   const { user, loading: userLoading } = useAppSelector((state) => state.user);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [userMenuPosition, setUserMenuPosition] = useState({ top: 0, right: 0 });
   const submenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -56,11 +57,6 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
         { path: '/properties/all', label: 'All Properties' },
       ],
     },
-    {
-      path: '/settings',
-      icon: Settings,
-      label: 'Settings',
-    },
   ];
 
   const isItemActive = (path: string) => {
@@ -83,6 +79,33 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
     setOpenSubmenu(openSubmenu === path ? null : path);
   };
 
+  // Update user menu position when opened or window resizes/scrolls
+  useEffect(() => {
+    if (!userMenuOpen || !userMenuRef.current) return;
+
+    const updatePosition = () => {
+      if (userMenuRef.current) {
+        const rect = userMenuRef.current.getBoundingClientRect();
+        setUserMenuPosition({
+          top: rect.bottom + 8,
+          right: window.innerWidth - rect.right,
+        });
+      }
+    };
+
+    // Initial position
+    updatePosition();
+
+    // Update on scroll and resize
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [userMenuOpen]);
+
   // Close submenu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -90,7 +113,8 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
       if (openSubmenu && !target.closest('.submenu-container')) {
         setOpenSubmenu(null);
       }
-      if (userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(target)) {
+      // Check if click is outside user menu (portal renders to body, so check by class)
+      if (userMenuOpen && !target.closest('[data-user-menu]') && !target.closest('[data-user-menu-trigger]')) {
         setUserMenuOpen(false);
       }
     };
@@ -214,7 +238,7 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
               </motion.div>
 
               {/* User Profile Menu */}
-              <div className="relative pl-3 border-l border-gray-200" ref={userMenuRef}>
+              <div className="relative pl-3 border-l border-gray-200" ref={userMenuRef} data-user-menu-trigger>
                 <motion.div
                   className="flex items-center gap-2 sm:gap-3 cursor-pointer"
                   whileHover={{ scale: 1.02 }}
@@ -263,94 +287,6 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
                   />
                 </motion.div>
 
-                {/* User Menu Dropdown */}
-                <AnimatePresence>
-                  {userMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
-                    >
-                      {/* User Info Header */}
-                      <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ring-2 ring-white/30">
-                            {user?.avatar ? (
-                              <img
-                                src={user.avatar}
-                                alt={getUserDisplayName()}
-                                className="w-full h-full object-cover rounded-full"
-                              />
-                            ) : (
-                              <UserCircle size={24} className="text-white" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-white truncate">
-                              {getUserDisplayName()}
-                            </p>
-                            <p className="text-xs text-indigo-100 truncate">{user?.email}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* User Details */}
-                      <div className="p-3 space-y-1">
-                        {user?.phone && (
-                          <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-50">
-                            <Phone size={16} className="text-gray-400" />
-                            <span>{user.phone}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-50">
-                          <Mail size={16} className="text-gray-400" />
-                          <span className="truncate">{user?.email}</span>
-                        </div>
-                        {user?.roles && user.roles.length > 0 && (
-                          <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg">
-                            <Shield size={16} className="text-gray-400" />
-                            <div className="flex flex-wrap gap-1">
-                              {user.roles.map((role) => (
-                                <span
-                                  key={role}
-                                  className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-md"
-                                >
-                                  {role}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Menu Actions */}
-                      <div className="border-t border-gray-200 p-2">
-                        <Link
-                          to="/settings"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <Settings size={18} className="text-gray-400" />
-                          <span>Settings</span>
-                        </Link>
-                        <Button
-                          onClick={() => {
-                            setUserMenuOpen(false);
-                            // TODO: Implement logout
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-red-600 hover:bg-red-50"
-                          leftIcon={<LogOut size={18} />}
-                        >
-                          Logout
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
 
               {/* Logout */}
@@ -493,6 +429,96 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
           </nav>
         </div>
       </header>
+
+      {/* User Menu Dropdown Portal - Rendered outside header to avoid z-index issues */}
+      {typeof document !== 'undefined' && userMenuOpen && createPortal(
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed w-72 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+            data-user-menu
+            style={{
+              top: `${userMenuPosition.top}px`,
+              right: `${userMenuPosition.right}px`,
+              zIndex: 10000,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+              {/* User Info Header */}
+              <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ring-2 ring-white/30">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={getUserDisplayName()}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <UserCircle size={24} className="text-white" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">
+                      {getUserDisplayName()}
+                    </p>
+                    <p className="text-xs text-indigo-100 truncate">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Details */}
+              <div className="p-3 space-y-1">
+                {user?.phone && (
+                  <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-50">
+                    <Phone size={16} className="text-gray-400" />
+                    <span>{user.phone}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-50">
+                  <Mail size={16} className="text-gray-400" />
+                  <span className="truncate">{user?.email}</span>
+                </div>
+                {user?.roles && user.roles.length > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg">
+                    <Shield size={16} className="text-gray-400" />
+                    <div className="flex flex-wrap gap-1">
+                      {user.roles.map((role) => (
+                        <span
+                          key={role}
+                          className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-md"
+                        >
+                          {role}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Menu Actions */}
+              <div className="border-t border-gray-200 p-2">
+                <Button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    // TODO: Implement logout
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-red-600 hover:bg-red-50"
+                  leftIcon={<LogOut size={18} />}
+                >
+                  Logout
+                </Button>
+              </div>
+            </motion.div>
+          </AnimatePresence>,
+          document.body
+        )
+      }
 
       {/* Submenu Dropdown Portal - Rendered outside header to avoid overflow issues */}
       {typeof document !== 'undefined' && openSubmenu && (() => {

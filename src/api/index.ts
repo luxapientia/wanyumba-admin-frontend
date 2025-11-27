@@ -9,5 +9,12 @@ export type {
   RejectPropertyDto,
   FlagPropertyDto,
 } from './properties.service.js';
-export type { User, UserResponse } from './user.service.js';
+export type { 
+  User, 
+  UserResponse, 
+  UsersResponse, 
+  UserFilters, 
+  CreateUserDto, 
+  UpdateUserDto 
+} from './user.service.js';
 
