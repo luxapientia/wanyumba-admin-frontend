@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart'> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   loading?: boolean;
@@ -49,6 +49,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'text-gray-700 bg-transparent hover:bg-gray-100 focus:ring-gray-500/50 active:scale-95',
       danger:
         'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/50 focus:ring-red-500/50 active:scale-95',
+      success:
+        'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-green-500/50 focus:ring-green-500/50 active:scale-95',
     };
 
     const sizes = {

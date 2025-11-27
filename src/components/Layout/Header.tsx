@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, User, Home, Shield, LogOut, Menu, X, ChevronDown, Mail, Phone, UserCircle } from 'lucide-react';
+import { Bell, User, Home, Shield, LogOut, Menu, X, ChevronDown, Mail, Phone, UserCircle, Bot } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
 import { fetchCurrentUser } from '../../store/thunks/userThunks.js';
@@ -55,6 +55,16 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
       submenus: [
         { path: '/properties/pending', label: 'Pending Approval' },
         { path: '/properties/all', label: 'All Properties' },
+      ],
+    },
+    {
+      path: '/scraper',
+      icon: Bot,
+      label: 'Scraper',
+      submenus: [
+        { path: '/scraper/scrape', label: 'Scrape Control' },
+        { path: '/scraper/listings', label: 'Listings' },
+        { path: '/scraper/agents', label: 'Agents' },
       ],
     },
   ];
