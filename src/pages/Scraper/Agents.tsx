@@ -208,6 +208,7 @@ const Agents = () => {
           onSort={handleSort}
           sortKey={sortBy}
           sortDirection={sortOrder}
+          onRowClick={(agent: Agent) => navigate(`/scraper/agents/${agent.id}`)}
         />
       </motion.div>
 

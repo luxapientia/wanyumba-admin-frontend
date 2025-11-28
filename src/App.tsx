@@ -7,7 +7,7 @@ import { Dashboard } from './pages/Dashboard';
 import { PendingProperties, AllProperties } from './pages/Properties';
 import PropertyDetail from './pages/Properties/PropertyDetail';
 import { Users, UserDetail } from './pages/Users';
-import { ScrapeControl, Listings, Agents, ListingDetail } from './pages/Scraper';
+import { ScrapeControl, Listings, Agents, ListingDetail, AgentDetail } from './pages/Scraper';
 
 function App() {
   return (
@@ -40,7 +40,10 @@ function App() {
                   <Route index element={<Listings />} />
                   <Route path=":url" element={<ListingDetail />} />
                 </Route>
-                <Route path="agents" element={<Agents />} />
+                <Route path="agents">
+                  <Route index element={<Agents />} />
+                  <Route path=":id" element={<AgentDetail />} />
+                </Route>
                 <Route index element={<Navigate to="/scraper/scrape" replace />} />
               </Route>
               
