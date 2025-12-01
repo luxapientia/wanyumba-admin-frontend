@@ -6,7 +6,6 @@ import {
   BedDouble,
   Bath,
   Square,
-  Loader2,
   Info,
   Building2,
   Calendar,

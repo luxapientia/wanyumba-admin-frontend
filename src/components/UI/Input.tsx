@@ -96,7 +96,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             whileFocus={{ scale: 1.01 }}
             className={`${baseClasses} ${variants[variant]} ${sizes[inputSize]} ${paddingWithIcon} ${errorClasses} ${className}`}
             disabled={disabled}
-            {...props}
+            {...(props as any)}
           />
 
           {/* Icon - Right or Error Icon */}

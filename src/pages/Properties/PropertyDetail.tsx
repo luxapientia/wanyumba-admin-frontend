@@ -17,8 +17,6 @@ import {
   User,
   CheckCircle,
   XCircle,
-  DollarSign,
-  Info,
   Clock,
   CheckCircle2,
   Loader2,

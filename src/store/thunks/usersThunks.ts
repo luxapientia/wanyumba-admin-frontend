@@ -7,7 +7,7 @@ import type { UserFilters, CreateUserDto, UpdateUserDto } from '../../api/index.
  */
 export const fetchUsers = createAsyncThunk(
   'users/fetchUsers',
-  async (filters?: UserFilters, { rejectWithValue }) => {
+  async (filters: UserFilters | undefined = undefined, { rejectWithValue }) => {
     try {
       const response = await userService.getUsers(filters);
       if (response.success && response.data) {

@@ -6,13 +6,9 @@ import {
   Database, 
   AlertCircle, 
   TrendingUp, 
-  Shield, 
   CheckCircle, 
   ArrowUpRight,
-  Clock,
-  Activity,
   Zap,
-  BarChart3,
   FileText,
   Home,
   Bot,
@@ -24,7 +20,6 @@ import { StatCard } from '../../components/UI/index.js';
 import { dashboardService } from '../../api/index.js';
 import type { DashboardStats } from '../../api/index.js';
 import { useToast } from '../../contexts/index.js';
-import { staggerContainer } from '../../utils/animations.js';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -100,7 +95,7 @@ export default function Dashboard() {
       opacity: 1,
       y: 0,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 100,
         damping: 15,
       },
