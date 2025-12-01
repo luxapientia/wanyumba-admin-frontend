@@ -236,6 +236,33 @@ class PropertiesService {
     );
     return response.data;
   }
+
+  /**
+   * Detect if a property is a potential scam using AI
+   */
+  async detectScam(id: string): Promise<{
+    success: boolean;
+    message?: string;
+    data: {
+      isScam: boolean;
+      confidence: number;
+      riskLevel: 'low' | 'medium' | 'high' | 'critical';
+      reasons: string[];
+      riskFactors: Array<{
+        factor: string;
+        score: number;
+        reasoning: string;
+      }>;
+      recommendation: 'approve' | 'review' | 'reject';
+      timestamp: string;
+      listingId?: string;
+    };
+  }> {
+    const response = await apiClient.post(
+      `${this.API_PREFIX}/properties/${id}/scam-detection`
+    );
+    return response.data;
+  }
 }
 
 export default new PropertiesService();

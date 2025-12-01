@@ -22,9 +22,11 @@ import {
   Clock,
   CheckCircle2,
   Loader2,
+  Shield,
 } from 'lucide-react';
 import Button from '../../components/UI/Button.js';
-import { ConfirmationModal } from '../../components/UI/index.js';
+import { ConfirmationModal, ScamDetectionModal } from '../../components/UI/index.js';
+import type { ScamDetectionResult } from '../../components/UI/ScamDetectionModal.js';
 import { useToast } from '../../contexts/index.js';
 import { propertiesService } from '../../api/index.js';
 import type { Property } from '../../api/properties.service.js';
@@ -41,9 +43,13 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [scamDetectionModalOpen, setScamDetectionModalOpen] = useState(false);
+  const [scamDetectionResult, setScamDetectionResult] = useState<ScamDetectionResult | null>(null);
+  const [scamDetectionLoading, setScamDetectionLoading] = useState(false);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -72,7 +78,11 @@ export default function PropertyDetail() {
     fetchProperty();
   }, [id]);
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
+    setApprovalModalOpen(true);
+  };
+
+  const confirmApproval = async () => {
     if (!property || !id) return;
 
     setProcessing(true);
@@ -80,6 +90,7 @@ export default function PropertyDetail() {
       const result = await dispatch(approveProperty({ id: property.id })).unwrap();
       setProperty(result);
       toast?.success('Property Approved', 'Property has been approved and is now active.');
+      setApprovalModalOpen(false);
       setProcessing(false);
     } catch (error: any) {
       toast?.error('Approval Failed', error || 'Failed to approve property');
@@ -111,6 +122,29 @@ export default function PropertyDetail() {
     } catch (error: any) {
       toast?.error('Rejection Failed', error || 'Failed to reject property');
       setProcessing(false);
+    }
+  };
+
+  const handleScamDetection = async () => {
+    if (!property || !id) return;
+
+    setScamDetectionModalOpen(true);
+    setScamDetectionLoading(true);
+    setScamDetectionResult(null);
+
+    try {
+      const response = await propertiesService.detectScam(id);
+      if (response.success && response.data) {
+        setScamDetectionResult(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to detect scam');
+      }
+    } catch (error: any) {
+      console.error('Error detecting scam:', error);
+      toast?.error('Scam Detection Failed', error?.message || 'Failed to analyze property for scam indicators.');
+      setScamDetectionModalOpen(false);
+    } finally {
+      setScamDetectionLoading(false);
     }
   };
 
@@ -230,27 +264,38 @@ export default function PropertyDetail() {
               Property Details
             </h1>
           </div>
-          {property.status === 'PENDING' && (
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleApprove}
-                disabled={processing}
-                leftIcon={processing ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-                className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
-              >
-                Approve
-              </Button>
-              <Button
-                onClick={handleReject}
-                disabled={processing}
-                variant="outline"
-                leftIcon={<XCircle size={18} />}
-                className="border-red-500 text-red-600 hover:bg-red-50"
-              >
-                Reject
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleScamDetection}
+              disabled={processing || scamDetectionLoading}
+              variant="outline"
+              leftIcon={scamDetectionLoading ? <Loader2 className="animate-spin" size={18} /> : <Shield size={18} />}
+              className="border-purple-500 text-purple-600 hover:bg-purple-50"
+            >
+              {scamDetectionLoading ? 'Analyzing...' : 'Detect Scam'}
+            </Button>
+            {property.status === 'PENDING' && (
+              <>
+                <Button
+                  onClick={handleApprove}
+                  disabled={processing}
+                  leftIcon={processing ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
+                  className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+                >
+                  Approve
+                </Button>
+                <Button
+                  onClick={handleReject}
+                  disabled={processing}
+                  variant="outline"
+                  leftIcon={<XCircle size={18} />}
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                >
+                  Reject
+                </Button>
+              </>
+            )}
+          </div>
         </motion.div>
 
         {/* Main Content */}
@@ -554,6 +599,21 @@ export default function PropertyDetail() {
         </div>
       </div>
 
+      {/* Approval Modal */}
+      <ConfirmationModal
+        isOpen={approvalModalOpen}
+        onClose={() => {
+          setApprovalModalOpen(false);
+        }}
+        onConfirm={confirmApproval}
+        title="Approve Property"
+        message={`Are you sure you want to approve "${property.title}"? The property will be activated and visible to users.`}
+        confirmText="Approve Property"
+        cancelText="Cancel"
+        variant="info"
+        loading={processing}
+      />
+
       {/* Rejection Modal */}
       <ConfirmationModal
         isOpen={rejectionModalOpen}
@@ -588,6 +648,17 @@ export default function PropertyDetail() {
           </p>
         </div>
       </ConfirmationModal>
+
+      {/* Scam Detection Modal */}
+      <ScamDetectionModal
+        isOpen={scamDetectionModalOpen}
+        onClose={() => {
+          setScamDetectionModalOpen(false);
+          setScamDetectionResult(null);
+        }}
+        result={scamDetectionResult}
+        loading={scamDetectionLoading}
+      />
     </div>
   );
 }
