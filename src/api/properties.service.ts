@@ -1,5 +1,4 @@
 import { apiClient } from './axios.js';
-import axios from 'axios';
 
 export interface Property {
   id: string;
@@ -220,13 +219,11 @@ class PropertiesService {
    */
   async getPropertyById(id: string): Promise<{ success: boolean; message?: string; data: Property }> {
     // Get the base URL and construct inventory service URL
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api/v1';
     // Replace admin service port with inventory service port (3008)
-    const inventoryServiceURL = baseURL.replace(':3005', ':3008');
     
     // Call inventory management service directly with credentials
-    const response = await axios.get(
-      `${inventoryServiceURL}/properties/${id}`,
+    const response = await apiClient.get(
+      `${this.API_PREFIX}/properties/${id}`,
       {
         headers: {
           'Content-Type': 'application/json',
