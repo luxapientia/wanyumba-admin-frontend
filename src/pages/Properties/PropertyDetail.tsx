@@ -32,7 +32,6 @@ import { propertiesService } from '../../api/index.js';
 import type { Property } from '../../api/properties.service.js';
 import { useAppDispatch } from '../../store/hooks.js';
 import { approveProperty, rejectProperty } from '../../store/thunks/propertiesThunks.js';
-import { updateProperty } from '../../store/slices/propertiesSlice.js';
 
 export default function PropertyDetail() {
   const { id } = useParams<{ id: string }>();

@@ -7,7 +7,7 @@ import type { PropertyFilters, ApprovePropertyDto, RejectPropertyDto, FlagProper
  */
 export const fetchPendingProperties = createAsyncThunk(
   'properties/fetchPending',
-  async (filters?: PropertyFilters, { rejectWithValue }) => {
+  async (filters: PropertyFilters | undefined, { rejectWithValue }) => {
     try {
       const response = await propertiesService.getPendingProperties(filters);
       if (response.success && response.data) {
@@ -28,7 +28,7 @@ export const fetchPendingProperties = createAsyncThunk(
  */
 export const fetchAllProperties = createAsyncThunk(
   'properties/fetchAll',
-  async (filters?: PropertyFilters, { rejectWithValue }) => {
+  async (filters: PropertyFilters | undefined, { rejectWithValue }) => {
     try {
       const response = await propertiesService.getAllProperties(filters);
       if (response.success && response.data) {
