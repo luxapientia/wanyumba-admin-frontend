@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -20,7 +20,7 @@ import { AnimatedPage, Table, Pagination, Badge, Button } from '../../components
 import type { Column } from '../../components/UI/Table';
 import { useToast } from '../../contexts/ToastContext';
 
-interface AgentListing {
+interface AgentListing extends Record<string, unknown> {
   id: number;
   title: string;
   price: number;
@@ -47,19 +47,7 @@ const AgentDetail = () => {
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  useEffect(() => {
-    if (id) {
-      fetchAgent();
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (id) {
-      fetchListings();
-    }
-  }, [id, page, pageSize, sortBy, sortOrder]);
-
-  const fetchAgent = async () => {
+  const fetchAgent = useCallback(async () => {
     try {
       setLoading(true);
       const data = await scraperService.getAgentById(Number(id));
@@ -71,9 +59,9 @@ const AgentDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate, showError]);
 
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     try {
       setListingsLoading(true);
       const response = await scraperService.getAgentListings(Number(id), {
@@ -82,15 +70,30 @@ const AgentDetail = () => {
         sortBy,
         sortOrder,
       });
-      setListings(response.listings || []);
-      setTotal(response.total || 0);
+      if (response && typeof response === 'object' && 'listings' in response && 'total' in response) {
+        const resp = response as { listings?: unknown[]; total?: number };
+        setListings((resp.listings as typeof listings) || []);
+        setTotal(resp.total || 0);
+      }
     } catch (error) {
       console.error('Error fetching listings:', error);
       showError('Error', 'Failed to fetch agent listings');
     } finally {
       setListingsLoading(false);
     }
-  };
+  }, [id, page, pageSize, sortBy, sortOrder, showError]);
+
+  useEffect(() => {
+    if (id) {
+      fetchAgent();
+    }
+  }, [id, fetchAgent]);
+
+  useEffect(() => {
+    if (id) {
+      fetchListings();
+    }
+  }, [id, fetchListings]);
 
   const handleSort = (key: string, direction: 'asc' | 'desc') => {
     setSortBy(key);
@@ -118,7 +121,7 @@ const AgentDetail = () => {
       key: 'title',
       header: 'Property',
       sortable: true,
-      render: (_value: any, listing: AgentListing) => (
+      render: (_value: unknown, listing: AgentListing) => (
         <div className="flex flex-col">
           <span className="font-medium text-gray-900 line-clamp-1">{listing.title}</span>
           <span className="text-xs text-gray-500">
@@ -131,7 +134,7 @@ const AgentDetail = () => {
       key: 'price',
       header: 'Price',
       sortable: true,
-      render: (_value: any, listing: AgentListing) => (
+      render: (_value: unknown, listing: AgentListing) => (
         <div className="flex items-center gap-1 font-semibold text-green-600">
           <DollarSign className="w-4 h-4" />
           {formatPrice(listing.price)}
@@ -142,7 +145,7 @@ const AgentDetail = () => {
       key: 'city',
       header: 'Location',
       sortable: true,
-      render: (_value: any, listing: AgentListing) => (
+      render: (_value: unknown, listing: AgentListing) => (
         <div className="flex items-center gap-1 text-gray-700">
           <MapPin className="w-4 h-4 text-gray-400" />
           <span>{listing.city}</span>
@@ -154,7 +157,7 @@ const AgentDetail = () => {
       key: 'bedrooms',
       header: 'Beds/Baths',
       sortable: false,
-      render: (_value: any, listing: AgentListing) => (
+      render: (_value: unknown, listing: AgentListing) => (
         <div className="text-sm text-gray-600">
           {listing.bedrooms || 0} BR / {listing.bathrooms || 0} BA
         </div>
@@ -164,7 +167,7 @@ const AgentDetail = () => {
       key: 'listingType',
       header: 'Type',
       sortable: true,
-      render: (_value: any, listing: AgentListing) => (
+      render: (_value: unknown, listing: AgentListing) => (
         <Badge
           variant={listing.listingType === 'sale' ? 'blue' : 'purple'}
         >
@@ -176,7 +179,7 @@ const AgentDetail = () => {
       key: 'actions',
       header: 'Actions',
       sortable: false,
-      render: (_value: any, listing: AgentListing) => (
+      render: (_value: unknown, listing: AgentListing) => (
         <Button
           variant="ghost"
           size="sm"
@@ -353,7 +356,7 @@ const AgentDetail = () => {
         transition={{ delay: 0.2 }}
       >
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Agent Listings</h2>
-        <Table
+        <Table<AgentListing>
           data={listings}
           columns={columns}
           isLoading={listingsLoading}
@@ -361,7 +364,7 @@ const AgentDetail = () => {
           onSort={handleSort}
           sortKey={sortBy}
           sortDirection={sortOrder}
-          onRowClick={(listing: AgentListing) => navigate(`/scraper/listings/${encodeURIComponent(listing.rawUrl)}`)}
+          onRowClick={(listing) => navigate(`/scraper/listings/${encodeURIComponent(listing.rawUrl)}`)}
         />
       </motion.div>
 

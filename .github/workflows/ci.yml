@@ -126,9 +126,14 @@ jobs:
           echo "Fork PR detected: GitHub Secrets are not available to this workflow run."
           echo "The build will proceed using defaults or .env.example values."
 
+      - name: Run TypeScript type check
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: pnpm exec tsc --build --force
+        continue-on-error: false
+
       - name: Run ESLint
         working-directory: ${{ needs.detect-project-path.outputs.project-path }}
-        run: pnpm run lint
+        run: pnpm run lint --max-warnings=1000
         continue-on-error: false
 
   build:

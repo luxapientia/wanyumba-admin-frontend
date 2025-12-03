@@ -172,11 +172,15 @@ const ScrapeControl = () => {
         );
         setScraperScrapingStates(prev => ({ ...prev, [targetSite]: false }));
       }
-    } catch (err: any) {
-      error(
-        'Scraping Failed',
-        err?.response?.data?.detail || err?.message || 'Failed to start scraping operation'
-      );
+    } catch (err: unknown) {
+      let errorMessage = 'Failed to start scraping operation';
+      if (err && typeof err === 'object') {
+        const errorObj = err as { response?: { data?: { detail?: string } }; message?: string };
+        errorMessage = errorObj.response?.data?.detail || errorObj.message || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      error('Scraping Failed', errorMessage);
       setScraperScrapingStates(prev => ({ ...prev, [targetSite]: false }));
     }
   };
@@ -202,11 +206,15 @@ const ScrapeControl = () => {
         );
         setScraperScrapingStates(prev => ({ ...prev, [targetSite]: false }));
       }
-    } catch (err: any) {
-      error(
-        'Details Scraping Failed',
-        err?.response?.data?.detail || err?.message || 'Failed to start details scraping operation'
-      );
+    } catch (err: unknown) {
+      let errorMessage = 'Failed to start details scraping operation';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errorObj = err as { response?: { data?: { detail?: string } } };
+        errorMessage = errorObj.response?.data?.detail || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      error('Details Scraping Failed', errorMessage);
       setScraperScrapingStates(prev => ({ ...prev, [targetSite]: false }));
     }
   };
@@ -228,11 +236,15 @@ const ScrapeControl = () => {
           `Automatic scraping cycle for ${targetSite} has been started. ${response.message || ''}`
         );
       }
-    } catch (err: any) {
-      error(
-        'Auto Cycle Failed',
-        err?.response?.data?.detail || err?.message || 'Failed to start auto cycle'
-      );
+    } catch (err: unknown) {
+      let errorMessage = 'Failed to start auto cycle';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errorObj = err as { response?: { data?: { detail?: string } } };
+        errorMessage = errorObj.response?.data?.detail || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      error('Auto Cycle Failed', errorMessage);
       setScraperScrapingStates(prev => ({ ...prev, [targetSite]: false }));
     }
   };
@@ -252,11 +264,15 @@ const ScrapeControl = () => {
         );
         setScraperScrapingStates(prev => ({ ...prev, [targetSite]: false }));
       }
-    } catch (err: any) {
-      error(
-        'Stop Failed',
-        err?.response?.data?.detail || err?.message || 'Failed to stop scraping operation'
-      );
+    } catch (err: unknown) {
+      let errorMessage = 'Failed to stop scraping operation';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errorObj = err as { response?: { data?: { detail?: string } } };
+        errorMessage = errorObj.response?.data?.detail || errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      error('Stop Failed', errorMessage);
     } finally {
       setScraperStoppingStates(prev => ({ ...prev, [targetSite]: false }));
     }
@@ -378,7 +394,7 @@ const ScrapeControl = () => {
                   title="Pages Scraped"
                   value={`${status.pages_scraped}${status.total_pages ? `/${status.total_pages}` : ''}`}
                   icon={FileText}
-                  color={colors.primary as any}
+                  color={colors.primary as 'blue' | 'green' | 'orange' | 'pink' | 'purple' | 'teal'}
                   loading={false}
                 />
                 <StatCard
@@ -403,7 +419,7 @@ const ScrapeControl = () => {
                   title="URLs Processed"
                   value={`${status.urls_scraped}/${status.total_urls}`}
                   icon={FileText}
-                  color={colors.primary as any}
+                  color={colors.primary as 'blue' | 'green' | 'orange' | 'pink' | 'purple' | 'teal'}
                   loading={false}
                 />
                 <StatCard

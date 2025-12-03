@@ -19,7 +19,7 @@ export interface Property {
   ward?: string;
   latitude?: number;
   longitude?: number;
-  features?: Record<string, any>;
+  features?: Record<string, unknown>;
   ownerId: string;
   ownerType: string;
   contactName?: string;
@@ -89,7 +89,7 @@ class PropertiesService {
    * Get pending properties with pagination, sorting, filtering, and search
    */
   async getPendingProperties(filters?: PropertyFilters): Promise<PropertiesResponse> {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number | undefined> = {
       page: filters?.page || 1,
       limit: filters?.limit || 20,
       sortBy: filters?.sortBy || 'createdAt',
@@ -117,7 +117,7 @@ class PropertiesService {
    * Get all properties with pagination, sorting, filtering, and search
    */
   async getAllProperties(filters?: PropertyFilters): Promise<PropertiesResponse> {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number | undefined> = {
       page: filters?.page || 1,
       limit: filters?.limit || 20,
       sortBy: filters?.sortBy || 'createdAt',
@@ -167,7 +167,7 @@ class PropertiesService {
   /**
    * Flag a property for review
    */
-  async flagProperty(id: string, data?: FlagPropertyDto): Promise<{ success: boolean; message: string; data: any }> {
+  async flagProperty(id: string, data?: FlagPropertyDto): Promise<{ success: boolean; message: string; data: unknown }> {
     const response = await apiClient.post(
       `${this.API_PREFIX}/properties/${id}/flag`,
       data || {}
@@ -184,7 +184,7 @@ class PropertiesService {
     priority?: string;
     page?: number;
     limit?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const response = await apiClient.get(
       `${this.API_PREFIX}/moderation/queue`,
       {
@@ -203,7 +203,7 @@ class PropertiesService {
     targetType?: string;
     page?: number;
     limit?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const response = await apiClient.get(
       `${this.API_PREFIX}/logs`,
       {

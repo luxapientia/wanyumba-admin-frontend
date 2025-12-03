@@ -26,7 +26,7 @@ export const useWebSocketSync = () => {
       const { target_site, data } = lastMessage;
       
       if (target_site && data) {
-        const site = target_site.toLowerCase();
+        const site = String(target_site).toLowerCase();
         dispatch(updateStatus({ site, status: data as ScrapingStatus }));
       }
     }

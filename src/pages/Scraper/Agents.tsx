@@ -11,6 +11,7 @@ import {
 } from '../../store/slices/agentsSlice';
 import { fetchAgents, deleteAgentById } from '../../store/thunks/agentsThunks';
 import { Input, Table, Pagination, AnimatedPage } from '../../components/UI';
+import type { Column } from '../../components/UI/Table';
 import type { Agent } from '../../api/scraper.service';
 import { useToast } from '../../contexts/ToastContext';
 import { ConfirmationModal } from '../../components/UI';
@@ -53,7 +54,7 @@ const Agents = () => {
         setAgentToDelete(null);
         // Refresh the list
         dispatch(fetchAgents());
-      } catch (err) {
+      } catch {
         showError('Error', 'Failed to delete agent');
         setDeleteModalOpen(false);
         setAgentToDelete(null);
@@ -66,7 +67,7 @@ const Agents = () => {
       key: 'id',
       header: 'ID',
       sortable: true,
-      render: (_value: any, agent: Agent) => (
+      render: (_value: unknown, agent: Agent) => (
         <span className="font-mono text-sm text-gray-600">{agent.id}</span>
       ),
     },
@@ -74,7 +75,7 @@ const Agents = () => {
       key: 'name',
       header: 'Name',
       sortable: true,
-      render: (_value: any, agent: Agent) => (
+      render: (_value: unknown, agent: Agent) => (
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
             {agent.name ? agent.name.charAt(0).toUpperCase() : '?'}
@@ -89,7 +90,7 @@ const Agents = () => {
       key: 'phone',
       header: 'Phone',
       sortable: true,
-      render: (_value: any, agent: Agent) => (
+      render: (_value: unknown, agent: Agent) => (
         <div className="flex items-center gap-2 text-gray-700">
           <Phone className="w-4 h-4 text-blue-500" />
           <a
@@ -105,7 +106,7 @@ const Agents = () => {
       key: 'email',
       header: 'Email',
       sortable: true,
-      render: (_value: any, agent: Agent) => (
+      render: (_value: unknown, agent: Agent) => (
         <div className="flex items-center gap-2 text-gray-700">
           {agent.email ? (
             <>
@@ -127,7 +128,7 @@ const Agents = () => {
       key: 'createdAt',
       header: 'Created',
       sortable: true,
-      render: (_value: any, agent: Agent) => (
+      render: (_value: unknown, agent: Agent) => (
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="w-4 h-4" />
           <span>{new Date(agent.createdAt).toLocaleDateString()}</span>
@@ -138,7 +139,7 @@ const Agents = () => {
       key: 'actions',
       header: 'Actions',
       sortable: false,
-      render: (_value: any, agent: Agent) => (
+      render: (_value: unknown, agent: Agent) => (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -200,15 +201,15 @@ const Agents = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <Table
-          data={items}
-          columns={columns}
+        <Table<Record<string, unknown>>
+          data={items as unknown as Array<Record<string, unknown>>}
+          columns={columns as unknown as Column<Record<string, unknown>>[]}
           isLoading={loading}
           emptyMessage="No agents found"
           onSort={handleSort}
           sortKey={sortBy}
           sortDirection={sortOrder}
-          onRowClick={(agent: Agent) => navigate(`/scraper/agents/${agent.id}`)}
+          onRowClick={(agent) => navigate(`/scraper/agents/${(agent as unknown as Agent).id}`)}
         />
       </motion.div>
 

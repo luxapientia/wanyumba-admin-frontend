@@ -17,8 +17,9 @@ export const fetchPendingProperties = createAsyncThunk(
         };
       }
       throw new Error(response.message || 'Failed to fetch pending properties');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch pending properties');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch pending properties';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -38,8 +39,9 @@ export const fetchAllProperties = createAsyncThunk(
         };
       }
       throw new Error(response.message || 'Failed to fetch properties');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch properties');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch properties';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -56,8 +58,9 @@ export const approveProperty = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to approve property');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to approve property');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to approve property';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -74,8 +77,9 @@ export const rejectProperty = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to reject property');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to reject property');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reject property';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -92,8 +96,9 @@ export const flagProperty = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to flag property');
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to flag property');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to flag property';
+      return rejectWithValue(errorMessage);
     }
   }
 );

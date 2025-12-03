@@ -90,7 +90,7 @@ class UserService {
    * Get all users with pagination, filtering, search, and sorting
    */
   async getUsers(filters?: UserFilters): Promise<UsersResponse> {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number | boolean | undefined> = {
       page: filters?.page || 1,
       limit: filters?.limit || 20,
       sortBy: filters?.sortBy || 'createdAt',

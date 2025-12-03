@@ -5,12 +5,12 @@ import { ArrowUp, ArrowDown, ArrowUpDown, Loader2 } from 'lucide-react';
 export interface Column<T> {
   key: string;
   header: string;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
   sortable?: boolean;
   width?: string;
 }
 
-export interface TableProps<T> {
+export interface TableProps<T = Record<string, unknown>> {
   columns: Column<T>[];
   data: T[];
   isLoading?: boolean;
@@ -21,7 +21,7 @@ export interface TableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-function Table<T extends Record<string, any>>({
+function Table<T extends Record<string, unknown> = Record<string, unknown>>({
   columns,
   data,
   isLoading = false,
@@ -137,7 +137,7 @@ function Table<T extends Record<string, any>>({
                     >
                       {column.render
                         ? column.render(row[column.key], row)
-                        : row[column.key] || '-'}
+                        : (row[column.key] as React.ReactNode) ?? '-'}
                     </td>
                   ))}
                 </motion.tr>

@@ -227,8 +227,14 @@ export default function UserDetail() {
       setIsEditing(false);
       setValidationErrors({});
       toast?.success('User Updated', 'User information has been updated successfully.');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error || 'Failed to update user';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to update user';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } } };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       toast?.error('Update Failed', errorMessage);
     } finally {
       setSaving(false);
@@ -303,8 +309,14 @@ export default function UserDetail() {
       } else {
         throw new Error(response.message || 'Failed to change password');
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to change password';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to change password';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       toast?.error('Change Password Failed', errorMessage);
     } finally {
       setChangingPassword(false);

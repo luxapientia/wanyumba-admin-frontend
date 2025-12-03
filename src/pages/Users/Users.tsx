@@ -66,7 +66,7 @@ export default function Users() {
     };
 
     dispatch(fetchUsers(fetchFilters));
-  }, [dispatch, page, limit, sortBy, sortOrder, filters.role, filters.isActive, filters.isEmailVerified, search]);
+  }, [dispatch, page, limit, sortBy, sortOrder, filters, search]);
 
   const handleSearch = () => {
     dispatch(setSearch(searchInput));
@@ -129,10 +129,11 @@ export default function Users() {
         sortOrder: sortOrder || 'desc',
         search: search || undefined,
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Update failed';
       toast?.error(
         'Update Failed',
-        error || 'Failed to update user status'
+        errorMessage
       );
     } finally {
       setTogglingUsers((prev) => {

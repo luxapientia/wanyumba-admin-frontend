@@ -31,7 +31,7 @@ import Button from '../../components/UI/Button.js';
 import { ConfirmationModal, Pagination } from '../../components/UI/index.js';
 import PropertyCard from '../../components/Properties/PropertyCard.js';
 import { useToast } from '../../contexts/index.js';
-import type { Property } from '../../api/properties.service.js';
+import type { Property, PropertyFilters } from '../../api/properties.service.js';
 
 export default function AllProperties() {
   const navigate = useNavigate();
@@ -74,17 +74,17 @@ export default function AllProperties() {
 
   // Fetch properties when filters, pagination, or sorting changes
   useEffect(() => {
-    const fetchFilters = {
+    const fetchFilters: PropertyFilters = {
       ...filters,
       page,
       limit,
-      sortBy: sortBy as any,
+      sortBy: sortBy as PropertyFilters['sortBy'],
       sortOrder,
       search: search || undefined,
     };
 
     dispatch(fetchAllProperties(fetchFilters));
-  }, [dispatch, page, limit, sortBy, sortOrder, filters.propertyType, filters.listingType, filters.minPrice, filters.maxPrice, filters.minBedrooms, filters.status, search]);
+  }, [dispatch, page, limit, sortBy, sortOrder, filters, search]);
 
   const confirmRejection = async () => {
     if (!propertyToReject) return;
@@ -105,18 +105,19 @@ export default function AllProperties() {
       setActionLoading(null);
       
       // Refetch properties after rejection
-      const fetchFilters = {
+      const fetchFilters: PropertyFilters = {
         ...filters,
         page,
         limit,
-        sortBy: sortBy as any,
+        sortBy: sortBy as PropertyFilters['sortBy'],
         sortOrder,
         search: search || undefined,
       };
       
       dispatch(fetchAllProperties(fetchFilters));
-    } catch (error: any) {
-      toast?.error('Rejection Failed', error || 'Failed to reject property');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reject property';
+      toast?.error('Rejection Failed', errorMessage);
       setActionLoading(null);
     }
   };
@@ -144,11 +145,11 @@ export default function AllProperties() {
   };
 
   const handleRefresh = () => {
-    const fetchFilters = {
+    const fetchFilters: PropertyFilters = {
       ...filters,
       page,
       limit,
-      sortBy: sortBy as any,
+      sortBy: sortBy as PropertyFilters['sortBy'],
       sortOrder,
       search: search || undefined,
     };
@@ -193,7 +194,7 @@ export default function AllProperties() {
                 <Button
                   key={status}
                   onClick={() => {
-                    dispatch(setAllFilters({ status: statusValue as any }));
+                    dispatch(setAllFilters({ status: (statusValue as PropertyFilters['status']) ?? undefined }));
                   }}
                   variant={isActive ? 'primary' : 'ghost'}
                   size="sm"
@@ -236,7 +237,9 @@ export default function AllProperties() {
                 value={`${sortBy}_${sortOrder}`}
                 onChange={(e) => {
                   const [sortField, order] = e.target.value.split('_');
-                  dispatch(setAllSorting({ sortBy: sortField as any, sortOrder: order as 'asc' | 'desc' }));
+                  if (sortField && order) {
+                    dispatch(setAllSorting({ sortBy: sortField as string, sortOrder: order as 'asc' | 'desc' }));
+                  }
                 }}
                 className="appearance-none pl-10 pr-8 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white font-medium text-sm cursor-pointer hover:border-purple-400"
               >

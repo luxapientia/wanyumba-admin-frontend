@@ -13,9 +13,11 @@ interface HeaderProps {
   onCloseDrawer: () => void;
 }
 
+import type { LucideIcon } from 'lucide-react';
+
 interface NavItem {
   path: string;
-  icon: any;
+  icon: LucideIcon;
   label: string;
   submenus?: { path: string; label: string }[];
 }

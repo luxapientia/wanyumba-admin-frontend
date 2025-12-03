@@ -17,8 +17,14 @@ export const fetchUsers = createAsyncThunk(
         };
       }
       throw new Error(response.message || 'Failed to fetch users');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to fetch users';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to fetch users';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
@@ -36,8 +42,14 @@ export const createUser = createAsyncThunk(
         return response.data.user;
       }
       throw new Error(response.message || 'Failed to create user');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to create user';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to create user';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
@@ -55,8 +67,14 @@ export const updateUser = createAsyncThunk(
         return response.data.user;
       }
       throw new Error(response.message || 'Failed to update user');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to update user';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to update user';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
@@ -74,8 +92,14 @@ export const deleteUser = createAsyncThunk(
         return userId;
       }
       throw new Error(response.message || 'Failed to delete user');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to delete user';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to delete user';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
@@ -93,8 +117,14 @@ export const updateUserRoles = createAsyncThunk(
         return response.data.user;
       }
       throw new Error(response.message || 'Failed to update user roles');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to update user roles';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to update user roles';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
@@ -112,8 +142,14 @@ export const addRoleToUser = createAsyncThunk(
         return response.data.user;
       }
       throw new Error(response.message || 'Failed to add role to user');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to add role to user';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to add role to user';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
@@ -131,8 +167,14 @@ export const removeRoleFromUser = createAsyncThunk(
         return response.data.user;
       }
       throw new Error(response.message || 'Failed to remove role from user');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to remove role from user';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to remove role from user';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }
