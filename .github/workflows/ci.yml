@@ -102,12 +102,23 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: ${{ needs.detect-project-path.outputs.project-path }}
         run: |
-          : > .env
-          [ -n "${{ secrets.VITE_API_GATEWAY_URL }}" ] && echo "VITE_API_GATEWAY_URL=${{ secrets.VITE_API_GATEWAY_URL }}" >> .env
-          [ -n "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ] && echo "VITE_WANYUMBA_FRONTEND_URL=${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" >> .env
-          [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] && echo "VITE_SCRAPER_API_URL=${{ secrets.VITE_SCRAPER_API_URL }}" >> .env
-          [ -n "${{ secrets.VITE_ENABLE_OAUTH }}" ] && echo "VITE_ENABLE_OAUTH=${{ secrets.VITE_ENABLE_OAUTH }}" >> .env
-          [ -n "${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" ] && echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" >> .env
+          PROJECT_PATH="${{ needs.detect-project-path.outputs.project-path }}"
+          echo "Working directory: $(pwd)"
+          echo "Project path: $PROJECT_PATH"
+          
+          touch .env || {
+            echo "Failed to create .env file"
+            exit 1
+          }
+          
+          [ -n "${{ secrets.VITE_API_GATEWAY_URL }}" ] && echo "VITE_API_GATEWAY_URL=${{ secrets.VITE_API_GATEWAY_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ] && echo "VITE_WANYUMBA_FRONTEND_URL=${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] && echo "VITE_SCRAPER_API_URL=${{ secrets.VITE_SCRAPER_API_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_ENABLE_OAUTH }}" ] && echo "VITE_ENABLE_OAUTH=${{ secrets.VITE_ENABLE_OAUTH }}" >> .env || true
+          [ -n "${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" ] && echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" >> .env || true
+          
+          echo "✅ Created .env file with environment variables"
+          ls -la .env
 
       - name: Note on fork PRs
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
