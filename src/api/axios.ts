@@ -51,7 +51,7 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     // Handle common errors
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       // Unauthorized - clear token and redirect to login
       localStorage.removeItem('token');
       // Redirect to wanyumba-frontend login page
