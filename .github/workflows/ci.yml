@@ -108,9 +108,47 @@ jobs:
       - name: Check secrets availability (internal builds only)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
-          [ -n "${{ secrets.VITE_API_URL }}" ] || { echo "Missing VITE_API_URL"; exit 1; }
-          [ -n "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ] || { echo "Missing VITE_WANYUMBA_FRONTEND_URL"; exit 1; }
-          [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] || { echo "Missing VITE_SCRAPER_API_URL"; exit 1; }
+          echo "Checking required GitHub Secrets..."
+          echo "Event type: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          
+          MISSING_SECRETS=0
+          
+          if [ -z "${{ secrets.VITE_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_API_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_WANYUMBA_FRONTEND_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_WANYUMBA_FRONTEND_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_SCRAPER_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_SCRAPER_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_SCRAPER_API_URL is set"
+          fi
+          
+          if [ $MISSING_SECRETS -gt 0 ]; then
+            echo ""
+            echo "⚠️ Missing $MISSING_SECRETS required secret(s)."
+            echo "Please add the missing secrets in: Settings > Secrets and variables > Actions"
+            echo ""
+            echo "Required secrets:"
+            echo "  - VITE_API_URL"
+            echo "  - VITE_WANYUMBA_FRONTEND_URL"
+            echo "  - VITE_SCRAPER_API_URL"
+            exit 1
+          else
+            echo ""
+            echo "✅ All required secrets are available"
+          fi
 
       - name: Create .env from GitHub Secrets (internal builds)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -227,9 +265,47 @@ jobs:
       - name: Check secrets availability (internal builds only)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
-          [ -n "${{ secrets.VITE_API_URL }}" ] || { echo "Missing VITE_API_URL"; exit 1; }
-          [ -n "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ] || { echo "Missing VITE_WANYUMBA_FRONTEND_URL"; exit 1; }
-          [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] || { echo "Missing VITE_SCRAPER_API_URL"; exit 1; }
+          echo "Checking required GitHub Secrets..."
+          echo "Event type: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          
+          MISSING_SECRETS=0
+          
+          if [ -z "${{ secrets.VITE_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_API_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_WANYUMBA_FRONTEND_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_WANYUMBA_FRONTEND_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_SCRAPER_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_SCRAPER_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_SCRAPER_API_URL is set"
+          fi
+          
+          if [ $MISSING_SECRETS -gt 0 ]; then
+            echo ""
+            echo "⚠️ Missing $MISSING_SECRETS required secret(s)."
+            echo "Please add the missing secrets in: Settings > Secrets and variables > Actions"
+            echo ""
+            echo "Required secrets:"
+            echo "  - VITE_API_URL"
+            echo "  - VITE_WANYUMBA_FRONTEND_URL"
+            echo "  - VITE_SCRAPER_API_URL"
+            exit 1
+          else
+            echo ""
+            echo "✅ All required secrets are available"
+          fi
 
       - name: Create .env from GitHub Secrets (internal builds)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
