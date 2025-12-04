@@ -107,10 +107,19 @@ jobs:
 
       - name: Check secrets availability (internal builds only)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        continue-on-error: true
         run: |
           echo "Checking required GitHub Secrets..."
           echo "Event type: ${{ github.event_name }}"
           echo "Repository: ${{ github.repository }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "PR from: ${{ github.event.pull_request.head.repo.full_name }}"
+            echo "Base repo: ${{ github.repository }}"
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              echo "⚠️ This is a fork PR - secrets are not available for security reasons"
+            fi
+          fi
+          echo ""
           
           MISSING_SECRETS=0
           
@@ -137,13 +146,18 @@ jobs:
           
           if [ $MISSING_SECRETS -gt 0 ]; then
             echo ""
-            echo "⚠️ Missing $MISSING_SECRETS required secret(s)."
-            echo "Please add the missing secrets in: Settings > Secrets and variables > Actions"
+            echo "⚠️ WARNING: Missing $MISSING_SECRETS required secret(s)."
+            echo "The workflow will continue, but the build may fail if these are required."
+            echo ""
+            echo "To fix this, add the missing secrets in:"
+            echo "  Settings > Secrets and variables > Actions > New repository secret"
             echo ""
             echo "Required secrets:"
             echo "  - VITE_API_URL"
             echo "  - VITE_WANYUMBA_FRONTEND_URL"
             echo "  - VITE_SCRAPER_API_URL"
+            echo ""
+            echo "See .github/SECRETS_SETUP.md for detailed instructions."
             exit 1
           else
             echo ""
@@ -264,10 +278,19 @@ jobs:
 
       - name: Check secrets availability (internal builds only)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        continue-on-error: true
         run: |
           echo "Checking required GitHub Secrets..."
           echo "Event type: ${{ github.event_name }}"
           echo "Repository: ${{ github.repository }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "PR from: ${{ github.event.pull_request.head.repo.full_name }}"
+            echo "Base repo: ${{ github.repository }}"
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              echo "⚠️ This is a fork PR - secrets are not available for security reasons"
+            fi
+          fi
+          echo ""
           
           MISSING_SECRETS=0
           
@@ -294,13 +317,18 @@ jobs:
           
           if [ $MISSING_SECRETS -gt 0 ]; then
             echo ""
-            echo "⚠️ Missing $MISSING_SECRETS required secret(s)."
-            echo "Please add the missing secrets in: Settings > Secrets and variables > Actions"
+            echo "⚠️ WARNING: Missing $MISSING_SECRETS required secret(s)."
+            echo "The workflow will continue, but the build may fail if these are required."
+            echo ""
+            echo "To fix this, add the missing secrets in:"
+            echo "  Settings > Secrets and variables > Actions > New repository secret"
             echo ""
             echo "Required secrets:"
             echo "  - VITE_API_URL"
             echo "  - VITE_WANYUMBA_FRONTEND_URL"
             echo "  - VITE_SCRAPER_API_URL"
+            echo ""
+            echo "See .github/SECRETS_SETUP.md for detailed instructions."
             exit 1
           else
             echo ""
