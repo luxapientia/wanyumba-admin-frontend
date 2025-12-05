@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface JsonDataSectionProps {
   title: string;
@@ -63,7 +63,7 @@ export default function JsonDataSection({
   title,
   icon,
   data,
-  colorScheme = 'indigo',
+  colorScheme: _colorScheme = 'indigo',
   delay = 0.25,
 }: JsonDataSectionProps) {
   if (!data) return null;

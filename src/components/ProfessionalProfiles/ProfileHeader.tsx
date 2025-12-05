@@ -24,7 +24,6 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function ProfileHeader({ profile, type }: ProfileHeaderProps) {
-  const colorScheme = type === 'lawyer' ? 'indigo' : 'blue';
   const ringColor = type === 'lawyer' ? 'ring-indigo-100' : 'ring-blue-100';
   const gradientFrom = type === 'lawyer' ? 'from-indigo-500' : 'from-blue-500';
   const gradientTo = type === 'lawyer' ? 'to-purple-500' : 'to-cyan-500';

@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
-import JsonDataSection from './JsonDataSection.js';
 
 interface TeamInformationSectionProps {
   isSoloPractitioner?: boolean;
@@ -56,7 +55,7 @@ export default function TeamInformationSection({
             <span className="ml-2 text-gray-900 font-semibold">{companySize} employees</span>
           </div>
         )}
-        {teamMembers && (
+        {teamMembers !== undefined && teamMembers !== null && (
           <div className="mt-3">
             <span className="text-gray-500 block mb-2">Team Members:</span>
             <div className="bg-gray-50 rounded-lg p-3">

@@ -61,8 +61,9 @@ export default function LawyerDetail() {
       showSuccess('Success', 'Profile approved successfully');
       // Redirect to lawyers list page after successful approval
       navigate('/professional-profiles/lawyers');
-    } catch (error: any) {
-      showError('Error', error || 'Failed to approve profile');
+    } catch (error: unknown) {
+      const errorMessage = (error as { message?: string })?.message || (typeof error === 'string' ? error : 'Failed to approve profile');
+      showError('Error', errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -96,8 +97,9 @@ export default function LawyerDetail() {
       setModerationNotes('');
       // Redirect to lawyers list page after successful rejection
       navigate('/professional-profiles/lawyers');
-    } catch (error: any) {
-      showError('Error', error || 'Failed to reject profile');
+    } catch (error: unknown) {
+      const errorMessage = (error as { message?: string })?.message || (typeof error === 'string' ? error : 'Failed to reject profile');
+      showError('Error', errorMessage);
     } finally {
       setIsProcessing(false);
     }

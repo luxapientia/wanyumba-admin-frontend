@@ -78,6 +78,7 @@ export default function Valuers() {
     };
 
     dispatch(fetchValuerProfiles(fetchFilters));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, page, limit, sortBy, sortOrder, filters.status, filters.specialization, filters.propertyType, filters.valuationMethod, filters.isVerified, search]);
 
   const handleSearch = () => {

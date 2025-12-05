@@ -207,7 +207,7 @@ class ProfessionalProfilesService {
    * Get all lawyer profiles with pagination, filtering, sorting, and search
    */
   async getLawyerProfiles(filters?: ProfessionalProfilesFilters): Promise<LawyerProfilesResponse> {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number | boolean | undefined> = {
       page: filters?.page || 1,
       limit: filters?.limit || 20,
       sortBy: filters?.sortBy || 'createdAt',
@@ -227,7 +227,7 @@ class ProfessionalProfilesService {
    * Get all valuer profiles with pagination, filtering, sorting, and search
    */
   async getValuerProfiles(filters?: ProfessionalProfilesFilters): Promise<ValuerProfilesResponse> {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number | boolean | undefined> = {
       page: filters?.page || 1,
       limit: filters?.limit || 20,
       sortBy: filters?.sortBy || 'createdAt',

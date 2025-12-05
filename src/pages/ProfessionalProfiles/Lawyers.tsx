@@ -78,6 +78,7 @@ export default function Lawyers() {
     };
 
     dispatch(fetchLawyerProfiles(fetchFilters));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, page, limit, sortBy, sortOrder, filters.status, filters.specialization, filters.isVerified, search]);
 
   const handleSearch = () => {

@@ -17,8 +17,11 @@ export const fetchLawyerProfiles = createAsyncThunk(
         };
       }
       throw new Error(response.message || 'Failed to fetch lawyer profiles');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to fetch lawyer profiles';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to fetch lawyer profiles';
       return rejectWithValue(errorMessage);
     }
   }
@@ -39,8 +42,11 @@ export const fetchValuerProfiles = createAsyncThunk(
         };
       }
       throw new Error(response.message || 'Failed to fetch valuer profiles');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to fetch valuer profiles';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to fetch valuer profiles';
       return rejectWithValue(errorMessage);
     }
   }
@@ -58,8 +64,11 @@ export const fetchLawyerProfileById = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to fetch lawyer profile');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to fetch lawyer profile';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to fetch lawyer profile';
       return rejectWithValue(errorMessage);
     }
   }
@@ -77,8 +86,11 @@ export const fetchValuerProfileById = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to fetch valuer profile');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to fetch valuer profile';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to fetch valuer profile';
       return rejectWithValue(errorMessage);
     }
   }
@@ -96,8 +108,11 @@ export const approveLawyerProfile = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to approve lawyer profile');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to approve lawyer profile';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to approve lawyer profile';
       return rejectWithValue(errorMessage);
     }
   }
@@ -115,8 +130,11 @@ export const rejectLawyerProfile = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to reject lawyer profile');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to reject lawyer profile';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to reject lawyer profile';
       return rejectWithValue(errorMessage);
     }
   }
@@ -134,8 +152,11 @@ export const approveValuerProfile = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to approve valuer profile');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to approve valuer profile';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to approve valuer profile';
       return rejectWithValue(errorMessage);
     }
   }
@@ -153,8 +174,11 @@ export const rejectValuerProfile = createAsyncThunk(
         return response.data;
       }
       throw new Error(response.message || 'Failed to reject valuer profile');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to reject valuer profile';
+    } catch (error: unknown) {
+      const errorMessage = (error as { response?: { data?: { message?: string; error?: { message?: string } }; message?: string } })?.response?.data?.message 
+        || (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message 
+        || (error as { message?: string })?.message 
+        || 'Failed to reject valuer profile';
       return rejectWithValue(errorMessage);
     }
   }
