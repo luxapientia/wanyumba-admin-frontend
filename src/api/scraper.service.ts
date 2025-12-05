@@ -50,7 +50,7 @@ scraperApiClient.interceptors.response.use(
 // ============================================================================
 
 // Scraping Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: string;
   message: string;
   target_site?: string;
@@ -324,7 +324,7 @@ class ScraperService {
   /**
    * Get listings for a specific agent
    */
-  async getAgentListings(agentId: number, params: AgentsParams = {}): Promise<any> {
+  async getAgentListings(agentId: number, params: AgentsParams = {}): Promise<unknown> {
     const response = await scraperApiClient.get(`/agents/${agentId}/listings`, { params });
     return response.data;
   }

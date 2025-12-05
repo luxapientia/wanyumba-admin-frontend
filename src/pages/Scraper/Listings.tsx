@@ -131,9 +131,10 @@ const Listings = () => {
       width: 'w-24',
       sortable: true,
       render: (value) => {
+        const strValue = String(value ?? '');
         return (
-          <Badge variant={getSourceColor(value as string)}>
-            {value}
+          <Badge variant={getSourceColor(strValue)}>
+            {strValue}
           </Badge>
         );
       },
@@ -144,9 +145,9 @@ const Listings = () => {
       sortable: true,
       render: (value, row) => (
         <div className="max-w-md">
-          <div className="font-medium text-gray-900 truncate">{value || 'N/A'}</div>
+          <div className="font-medium text-gray-900 truncate">{String(value ?? 'N/A')}</div>
           {row.addressText && (
-            <div className="text-xs text-gray-500 truncate">{row.addressText}</div>
+            <div className="text-xs text-gray-500 truncate">{String(row.addressText ?? '')}</div>
           )}
         </div>
       ),
@@ -157,7 +158,7 @@ const Listings = () => {
       width: 'w-32',
       sortable: true,
       render: (value) => (
-        <span className="text-sm text-gray-700">{value || '-'}</span>
+        <span className="text-sm text-gray-700">{String(value ?? '-')}</span>
       ),
     },
     {
@@ -165,11 +166,14 @@ const Listings = () => {
       header: 'Listing',
       width: 'w-24',
       sortable: true,
-      render: (value) => (
-        <Badge variant={value === 'rent' ? 'blue' : 'green'}>
-          {value || '-'}
-        </Badge>
-      ),
+      render: (value) => {
+        const strValue = String(value ?? '-');
+        return (
+          <Badge variant={strValue === 'rent' ? 'blue' : 'green'}>
+            {strValue}
+          </Badge>
+        );
+      },
     },
     {
       key: 'price',
@@ -178,14 +182,16 @@ const Listings = () => {
       sortable: true,
       render: (value, row) => (
         <div className="text-sm">
-          {value ? (
+          {value && typeof value === 'number' ? (
             <>
               <span className="font-medium text-gray-900">
                 {new Intl.NumberFormat().format(value)}
               </span>
-              <span className="text-gray-500 ml-1">{row.priceCurrency}</span>
-              {row.pricePeriod && row.pricePeriod !== 'once' && (
-                <span className="text-xs text-gray-400">/{row.pricePeriod}</span>
+              {row.priceCurrency && (
+                <span className="text-gray-500 ml-1">{String(row.priceCurrency)}</span>
+              )}
+              {row.pricePeriod && String(row.pricePeriod) !== 'once' && (
+                <span className="text-xs text-gray-400">/{String(row.pricePeriod)}</span>
               )}
             </>
           ) : (
@@ -202,7 +208,7 @@ const Listings = () => {
       render: (value, row) => (
         <div className="text-sm text-gray-700">
           {value ? `${value}bd` : '-'}
-          {row.bathrooms && <span className="text-gray-400"> / {row.bathrooms}ba</span>}
+          {row.bathrooms && <span className="text-gray-400"> / {String(row.bathrooms)}ba</span>}
         </div>
       ),
     },
@@ -213,9 +219,9 @@ const Listings = () => {
       sortable: true,
       render: (value, row) => (
         <div className="text-sm">
-          <div className="text-gray-900">{value || '-'}</div>
+          <div className="text-gray-900">{String(value ?? '-')}</div>
           {row.district && (
-            <div className="text-xs text-gray-500">{row.district}</div>
+            <div className="text-xs text-gray-500">{String(row.district)}</div>
           )}
         </div>
       ),
@@ -225,11 +231,16 @@ const Listings = () => {
       header: 'Added',
       width: 'w-32',
       sortable: true,
-      render: (value) => (
-        <span className="text-sm text-gray-500">
-          {value ? new Date(value).toLocaleDateString() : '-'}
-        </span>
-      ),
+      render: (value) => {
+        if (value && (typeof value === 'string' || typeof value === 'number' || value instanceof Date)) {
+          return (
+            <span className="text-sm text-gray-500">
+              {new Date(value).toLocaleDateString()}
+            </span>
+          );
+        }
+        return <span className="text-sm text-gray-500">-</span>;
+      },
     },
   ];
 
@@ -612,9 +623,9 @@ const Listings = () => {
         transition={{ duration: 0.4, delay: 0.2 }}
         className="mb-4 sm:mb-6"
       >
-        <Table
-          columns={columns}
-          data={listings}
+        <Table<Record<string, unknown>>
+          columns={columns as unknown as Column<Record<string, unknown>>[]}
+          data={listings as unknown as Array<Record<string, unknown>>}
           isLoading={isLoading}
           emptyMessage="No listings found. Try adjusting your filters or scrape some listings first."
           onSort={handleSort}
@@ -622,8 +633,9 @@ const Listings = () => {
           sortDirection={sortOrder}
           onRowClick={(listing) => {
             // Navigate to detail page
-            if (listing.rawUrl) {
-              navigate(`/scraper/listings/${encodeURIComponent(listing.rawUrl)}`);
+            const listingData = listing as unknown as Listing;
+            if (listingData.rawUrl) {
+              navigate(`/scraper/listings/${encodeURIComponent(String(listingData.rawUrl))}`);
             }
           }}
         />

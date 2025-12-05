@@ -14,8 +14,14 @@ export const fetchRoles = createAsyncThunk(
         return response.data.roles as Role[];
       }
       throw new Error(response.message || 'Failed to fetch roles');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error?.message || error.message || 'Failed to fetch roles';
+    } catch (error: unknown) {
+      let errorMessage = 'Failed to fetch roles';
+      if (error && typeof error === 'object') {
+        const err = error as { response?: { data?: { message?: string; error?: { message?: string } } }; message?: string };
+        errorMessage = err.response?.data?.message || err.response?.data?.error?.message || err.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return rejectWithValue(errorMessage);
     }
   }

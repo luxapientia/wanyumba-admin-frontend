@@ -89,8 +89,9 @@ export default function PropertyDetail() {
       toast?.success('Property Approved', 'Property has been approved and is now active.');
       setApprovalModalOpen(false);
       setProcessing(false);
-    } catch (error: any) {
-      toast?.error('Approval Failed', error || 'Failed to approve property');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to approve property';
+      toast?.error('Approval Failed', errorMessage);
       setProcessing(false);
     }
   };
@@ -116,8 +117,9 @@ export default function PropertyDetail() {
       setRejectionModalOpen(false);
       setRejectionReason('');
       setProcessing(false);
-    } catch (error: any) {
-      toast?.error('Rejection Failed', error || 'Failed to reject property');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reject property';
+      toast?.error('Rejection Failed', errorMessage);
       setProcessing(false);
     }
   };
@@ -136,9 +138,10 @@ export default function PropertyDetail() {
       } else {
         throw new Error(response.message || 'Failed to detect scam');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error detecting scam:', error);
-      toast?.error('Scam Detection Failed', error?.message || 'Failed to analyze property for scam indicators.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to analyze property for scam indicators.';
+      toast?.error('Scam Detection Failed', errorMessage);
       setScamDetectionModalOpen(false);
     } finally {
       setScamDetectionLoading(false);

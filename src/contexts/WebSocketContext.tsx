@@ -4,7 +4,7 @@ export type WebSocketStatus = 'connecting' | 'connected' | 'disconnected' | 'err
 
 export interface WebSocketMessage {
   type: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface WebSocketContextType {
@@ -18,6 +18,7 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
+/* eslint-disable react-refresh/only-export-components */
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
   if (!context) {
@@ -93,9 +94,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
           
           // Handle connection message
           if (message.type === 'connection' && message.connection_id) {
-            setConnectionId(message.connection_id);
+            setConnectionId(message.connection_id as string);
             // Store connection ID in localStorage for reconnection
-            localStorage.setItem('ws_connection_id', message.connection_id);
+            localStorage.setItem('ws_connection_id', message.connection_id as string);
           }
           
           // Handle pong

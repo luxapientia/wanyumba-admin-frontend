@@ -1,0 +1,460 @@
+name: Admin Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, staging]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '10'
+
+jobs:
+  detect-project-path:
+    name: Detect Project Path
+    runs-on: ubuntu-latest
+    outputs:
+      project-path: ${{ steps.set-path.outputs.path }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Detect project location
+        id: set-path
+        run: |
+          if [ -f "wanyumba-admin-frontend/package.json" ]; then
+            echo "path=wanyumba-admin-frontend" >> $GITHUB_OUTPUT
+          elif [ -f "package.json" ]; then
+            echo "path=." >> $GITHUB_OUTPUT
+          else
+            echo "Unable to find package.json"
+            exit 1
+          fi
+
+  lint-and-type-check:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    needs: [detect-project-path]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Verify project structure
+        run: |
+          PROJECT_PATH="${{ needs.detect-project-path.outputs.project-path }}"
+          echo "Project path: $PROJECT_PATH"
+          echo "Current directory: $(pwd)"
+          if [ -d "$PROJECT_PATH" ]; then
+            echo "✅ Directory exists"
+            ls -la "$PROJECT_PATH/" | head -10
+          else
+            echo "❌ Directory does not exist"
+            exit 1
+          fi
+          if [ -f "$PROJECT_PATH/package.json" ]; then
+            echo "✅ package.json found"
+          else
+            echo "❌ package.json NOT found"
+            exit 1
+          fi
+          # Determine lockfile path
+          if [ "$PROJECT_PATH" = "." ]; then
+            LOCKFILE_PATH="pnpm-lock.yaml"
+          else
+            LOCKFILE_PATH="$PROJECT_PATH/pnpm-lock.yaml"
+          fi
+          if [ -f "$LOCKFILE_PATH" ]; then
+            echo "✅ Lockfile found at: $LOCKFILE_PATH"
+            echo "LOCKFILE_PATH=$LOCKFILE_PATH" >> $GITHUB_ENV
+          else
+            echo "⚠️ Lockfile not found at: $LOCKFILE_PATH"
+            echo "LOCKFILE_PATH=" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Node.js with cache
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+        continue-on-error: true
+        if: env.LOCKFILE_PATH != ''
+
+      - name: Install dependencies
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "Checking for lockfile..."
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "✅ pnpm-lock.yaml found, attempting frozen install..."
+            pnpm install --frozen-lockfile || {
+              echo "⚠️ Frozen lockfile install failed, trying without frozen lockfile"
+              pnpm install --no-frozen-lockfile
+            }
+          else
+            echo "⚠️ pnpm-lock.yaml not found, installing without frozen lockfile"
+            pnpm install
+          fi
+
+      - name: Check secrets availability (internal builds only)
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        continue-on-error: true
+        run: |
+          echo "Checking required GitHub Secrets..."
+          echo "Event type: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "PR from: ${{ github.event.pull_request.head.repo.full_name }}"
+            echo "Base repo: ${{ github.repository }}"
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              echo "⚠️ This is a fork PR - secrets are not available for security reasons"
+            fi
+          fi
+          echo ""
+          
+          MISSING_SECRETS=0
+          
+          if [ -z "${{ secrets.VITE_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_API_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_WANYUMBA_FRONTEND_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_WANYUMBA_FRONTEND_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_SCRAPER_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_SCRAPER_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_SCRAPER_API_URL is set"
+          fi
+          
+          if [ $MISSING_SECRETS -gt 0 ]; then
+            echo ""
+            echo "⚠️ WARNING: Missing $MISSING_SECRETS required secret(s)."
+            echo "The workflow will continue, but the build may fail if these are required."
+            echo ""
+            echo "To fix this, add the missing secrets in:"
+            echo "  Settings > Secrets and variables > Actions > New repository secret"
+            echo ""
+            echo "Required secrets:"
+            echo "  - VITE_API_URL"
+            echo "  - VITE_WANYUMBA_FRONTEND_URL"
+            echo "  - VITE_SCRAPER_API_URL"
+            echo ""
+            echo "See .github/SECRETS_SETUP.md for detailed instructions."
+            exit 1
+          else
+            echo ""
+            echo "✅ All required secrets are available"
+          fi
+
+      - name: Create .env from GitHub Secrets (internal builds)
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: |
+          PROJECT_PATH="${{ needs.detect-project-path.outputs.project-path }}"
+          echo "Working directory: $(pwd)"
+          echo "Project path: $PROJECT_PATH"
+          
+          touch .env || {
+            echo "Failed to create .env file"
+            exit 1
+          }
+          
+          [ -n "${{ secrets.VITE_API_URL }}" ] && echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ] && echo "VITE_WANYUMBA_FRONTEND_URL=${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] && echo "VITE_SCRAPER_API_URL=${{ secrets.VITE_SCRAPER_API_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_ENABLE_OAUTH }}" ] && echo "VITE_ENABLE_OAUTH=${{ secrets.VITE_ENABLE_OAUTH }}" >> .env || true
+          [ -n "${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" ] && echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" >> .env || true
+          
+          echo "✅ Created .env file with environment variables"
+          ls -la .env
+          echo "--- .env file contents (first 3 lines for verification) ---"
+          head -3 .env || echo "File is empty or doesn't exist"
+
+      - name: Note on fork PRs
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "Fork PR detected: GitHub Secrets are not available to this workflow run."
+          echo "The build will proceed using defaults or .env.example values."
+
+      - name: Run TypeScript type check
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: pnpm exec tsc --build --force
+        continue-on-error: false
+
+      - name: Run ESLint
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: pnpm run lint --max-warnings=1000
+        continue-on-error: false
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [detect-project-path, lint-and-type-check]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Verify project structure
+        run: |
+          PROJECT_PATH="${{ needs.detect-project-path.outputs.project-path }}"
+          echo "Project path: $PROJECT_PATH"
+          echo "Current directory: $(pwd)"
+          if [ -d "$PROJECT_PATH" ]; then
+            echo "✅ Directory exists"
+            ls -la "$PROJECT_PATH/" | head -10
+          else
+            echo "❌ Directory does not exist"
+            exit 1
+          fi
+          if [ -f "$PROJECT_PATH/package.json" ]; then
+            echo "✅ package.json found"
+          else
+            echo "❌ package.json NOT found"
+            exit 1
+          fi
+          # Determine lockfile path
+          if [ "$PROJECT_PATH" = "." ]; then
+            LOCKFILE_PATH="pnpm-lock.yaml"
+          else
+            LOCKFILE_PATH="$PROJECT_PATH/pnpm-lock.yaml"
+          fi
+          if [ -f "$LOCKFILE_PATH" ]; then
+            echo "✅ Lockfile found at: $LOCKFILE_PATH"
+            echo "LOCKFILE_PATH=$LOCKFILE_PATH" >> $GITHUB_ENV
+          else
+            echo "⚠️ Lockfile not found at: $LOCKFILE_PATH"
+            echo "LOCKFILE_PATH=" >> $GITHUB_ENV
+          fi
+
+      - name: Setup Node.js with cache
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+        continue-on-error: true
+        if: env.LOCKFILE_PATH != ''
+
+      - name: Install dependencies
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "Checking for lockfile..."
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "✅ pnpm-lock.yaml found, attempting frozen install..."
+            pnpm install --frozen-lockfile || {
+              echo "⚠️ Frozen lockfile install failed, trying without frozen lockfile"
+              pnpm install --no-frozen-lockfile
+            }
+          else
+            echo "⚠️ pnpm-lock.yaml not found, installing without frozen lockfile"
+            pnpm install
+          fi
+
+      - name: Check secrets availability (internal builds only)
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        continue-on-error: true
+        run: |
+          echo "Checking required GitHub Secrets..."
+          echo "Event type: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "PR from: ${{ github.event.pull_request.head.repo.full_name }}"
+            echo "Base repo: ${{ github.repository }}"
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              echo "⚠️ This is a fork PR - secrets are not available for security reasons"
+            fi
+          fi
+          echo ""
+          
+          MISSING_SECRETS=0
+          
+          if [ -z "${{ secrets.VITE_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_API_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_WANYUMBA_FRONTEND_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_WANYUMBA_FRONTEND_URL is set"
+          fi
+          
+          if [ -z "${{ secrets.VITE_SCRAPER_API_URL }}" ]; then
+            echo "❌ Missing required secret: VITE_SCRAPER_API_URL"
+            MISSING_SECRETS=$((MISSING_SECRETS + 1))
+          else
+            echo "✅ VITE_SCRAPER_API_URL is set"
+          fi
+          
+          if [ $MISSING_SECRETS -gt 0 ]; then
+            echo ""
+            echo "⚠️ WARNING: Missing $MISSING_SECRETS required secret(s)."
+            echo "The workflow will continue, but the build may fail if these are required."
+            echo ""
+            echo "To fix this, add the missing secrets in:"
+            echo "  Settings > Secrets and variables > Actions > New repository secret"
+            echo ""
+            echo "Required secrets:"
+            echo "  - VITE_API_URL"
+            echo "  - VITE_WANYUMBA_FRONTEND_URL"
+            echo "  - VITE_SCRAPER_API_URL"
+            echo ""
+            echo "See .github/SECRETS_SETUP.md for detailed instructions."
+            exit 1
+          else
+            echo ""
+            echo "✅ All required secrets are available"
+          fi
+
+      - name: Create .env from GitHub Secrets (internal builds)
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: |
+          PROJECT_PATH="${{ needs.detect-project-path.outputs.project-path }}"
+          echo "Working directory: $(pwd)"
+          echo "Project path: $PROJECT_PATH"
+          
+          touch .env || {
+            echo "Failed to create .env file"
+            exit 1
+          }
+          
+          [ -n "${{ secrets.VITE_API_URL }}" ] && echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" ] && echo "VITE_WANYUMBA_FRONTEND_URL=${{ secrets.VITE_WANYUMBA_FRONTEND_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] && echo "VITE_SCRAPER_API_URL=${{ secrets.VITE_SCRAPER_API_URL }}" >> .env || true
+          [ -n "${{ secrets.VITE_ENABLE_OAUTH }}" ] && echo "VITE_ENABLE_OAUTH=${{ secrets.VITE_ENABLE_OAUTH }}" >> .env || true
+          [ -n "${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" ] && echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" >> .env || true
+          
+          echo "✅ Created .env file with environment variables"
+          ls -la .env
+          echo "--- .env file contents (first 3 lines for verification) ---"
+          head -3 .env || echo "File is empty or doesn't exist"
+          echo "--- .env file contents (first 3 lines) ---"
+          head -3 .env || echo "File is empty or doesn't exist"
+
+      - name: Note on fork PRs
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          echo "Fork PR detected: GitHub Secrets are not available to this workflow run."
+          echo "The build will proceed using defaults or .env.example values."
+
+      - name: TypeScript type check and build
+        working-directory: ${{ needs.detect-project-path.outputs.project-path }}
+        run: pnpm run build
+        continue-on-error: false
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ${{ needs.detect-project-path.outputs.project-path }}/dist
+          retention-days: 7
+          if-no-files-found: warn
+
+  deploy:
+    name: Deploy to Server (SSH)
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST_PRODUCTION }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          debug: true
+          script: |
+            echo "✅ SSH connection successful!"
+            echo "User: $(whoami)"
+            echo "Hostname: $(hostname)"
+            echo "Current directory: $(pwd)"
+
+      - name: Clean old files and prepare directory
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST_PRODUCTION }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "🔐 Testing SSH connection..."
+            whoami
+            pwd
+            echo "🧹 Cleaning old files..."
+            mkdir -p /var/www/html/admin.wanyumba.com 2>/dev/null || sudo mkdir -p /var/www/html/admin.wanyumba.com
+            rm -rf /var/www/html/admin.wanyumba.com/{*,.*} 2>/dev/null || sudo rm -rf /var/www/html/admin.wanyumba.com/{*,.*} 2>/dev/null || true
+            chown -R $USER:$USER /var/www/html/admin.wanyumba.com 2>/dev/null || sudo chown -R $USER:$USER /var/www/html/admin.wanyumba.com
+            echo "✅ Directory cleaned and ready for deployment"
+
+      - name: Archive build files
+        run: |
+          cd dist && tar -czf ../deploy.tar.gz *
+
+      - name: Upload build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST_PRODUCTION }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "deploy.tar.gz"
+          target: "/tmp"
+
+      - name: Extract new files to admin.wanyumba.com
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST_PRODUCTION }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "📦 Extracting new files..."
+            sudo rm -rf /var/www/html/admin.wanyumba.com/{*,.*} 2>/dev/null || true
+            tar -xzf /tmp/deploy.tar.gz -C /var/www/html/admin.wanyumba.com
+            rm -f /tmp/deploy.tar.gz
+            echo "✅ New files extracted successfully"
+
+      - name: Set ownership and permissions
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST_PRODUCTION }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            sudo chown -R www-data:www-data /var/www/html/admin.wanyumba.com
+            sudo find /var/www/html/admin.wanyumba.com -type d -exec chmod 755 {} \;
+            sudo find /var/www/html/admin.wanyumba.com -type f -exec chmod 644 {} \;
+

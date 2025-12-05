@@ -62,7 +62,7 @@ const ListingDetail = () => {
     );
   }
 
-  const InfoRow = ({ label, value }: { label: string; value: any }) => {
+  const InfoRow = ({ label, value }: { label: string; value: unknown }) => {
     if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
       return null;
     }
@@ -70,7 +70,7 @@ const ListingDetail = () => {
     return (
       <div className="py-3 border-b border-gray-100 last:border-0">
         <dt className="text-sm font-medium text-gray-500 mb-1">{label}</dt>
-        <dd className="text-sm text-gray-900 font-medium">{value}</dd>
+        <dd className="text-sm text-gray-900 font-medium">{String(value ?? '')}</dd>
       </div>
     );
   };
