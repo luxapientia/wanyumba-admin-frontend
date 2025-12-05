@@ -113,8 +113,8 @@ export default function PropertyCard({
         {/* Image Section */}
         <div className={`relative ${isListView ? 'xl:w-72 h-48 xl:h-auto xl:min-h-full' : 'w-full h-56'} flex-shrink-0 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200`}>
           {/* Price Badge - Above Image */}
-          <div className="absolute top-3 right-3 z-10 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold rounded-lg shadow-lg backdrop-blur-sm">
-            {formatPrice(property.price, property.currency)}
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-xs sm:text-sm font-bold rounded-lg shadow-lg backdrop-blur-sm max-w-[calc(100%-1rem)] sm:max-w-none">
+            <span className="break-words line-clamp-2">{formatPrice(property.price, property.currency)}</span>
           </div>
           
           {property.media && property.media.length > 0 ? (
@@ -129,18 +129,18 @@ export default function PropertyCard({
               />
               {/* Image Count Badge */}
               {property.media.length > 1 && (
-                <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold rounded-lg flex items-center gap-1">
-                  <Building2 size={12} />
+                <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 px-2 sm:px-2.5 py-0.5 sm:py-1 bg-black/70 backdrop-blur-sm text-white text-[10px] sm:text-xs font-semibold rounded-lg flex items-center gap-1">
+                  <Building2 size={10} className="sm:w-3 sm:h-3" />
                   <span>{property.media.length} Photos</span>
                 </div>
               )}
               {/* Status Badge */}
               {badge && (
                 <div
-                  className={`absolute top-3 left-3 px-3 py-1.5 ${badge.bgColor} ${badge.textColor} text-xs font-bold rounded-lg shadow-lg flex items-center gap-1.5`}
+                  className={`absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-1 sm:py-1.5 ${badge.bgColor} ${badge.textColor} text-xs font-bold rounded-lg shadow-lg flex items-center gap-1 sm:gap-1.5 max-w-[calc(100%-4rem)] sm:max-w-none`}
                 >
                   {badge.icon}
-                  <span>{badge.label}</span>
+                  <span className="truncate">{badge.label}</span>
                 </div>
               )}
             </>
@@ -153,66 +153,66 @@ export default function PropertyCard({
         </div>
 
         {/* Content Section */}
-        <div className={`flex-1 p-4 sm:p-5 ${!isListView ? 'flex flex-col' : ''}`}>
+        <div className={`flex-1 p-3 sm:p-4 md:p-5 min-w-0 ${!isListView ? 'flex flex-col' : ''}`}>
           {/* Header */}
-          <div className={`mb-3 ${!isListView ? 'flex-1' : ''}`}>
-            <h3 className={`${isListView ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'} font-bold text-gray-900 mb-1 ${isListView ? 'line-clamp-1' : 'line-clamp-2'} group-hover:text-indigo-600 transition-colors`}>
+          <div className={`mb-3 ${!isListView ? 'flex-1' : ''} min-w-0`}>
+            <h3 className={`${isListView ? 'text-base sm:text-lg md:text-xl' : 'text-sm sm:text-base md:text-lg'} font-bold text-gray-900 mb-1 ${isListView ? 'line-clamp-1' : 'line-clamp-2'} group-hover:text-indigo-600 transition-colors break-words`}>
               {property.title || 'Untitled Property'}
             </h3>
             {property.description && (
-              <p className={`text-xs sm:text-sm text-gray-600 ${isListView ? 'line-clamp-1' : 'line-clamp-2'} leading-relaxed`}>
+              <p className={`text-xs sm:text-sm text-gray-600 ${isListView ? 'line-clamp-1' : 'line-clamp-2'} leading-relaxed break-words`}>
                 {property.description}
               </p>
             )}
           </div>
 
           {/* Property Type */}
-          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
-            <div className="w-7 h-7 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
-              <Building2 size={14} className="text-purple-600" />
+          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100 min-w-0">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Building2 size={12} className="sm:w-3.5 sm:h-3.5 text-purple-600" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-gray-500 leading-tight">Type</p>
-              <p className="text-sm font-bold text-gray-900 capitalize">
+              <p className="text-xs sm:text-sm font-bold text-gray-900 capitalize truncate">
                 {property.propertyType || 'N/A'}
               </p>
             </div>
           </div>
 
           {/* Property Stats */}
-          <div className={`grid ${isListView ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3'} gap-2 mb-3`}>
+          <div className={`grid ${isListView ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3'} gap-1.5 sm:gap-2 mb-3`}>
             {(property.bedrooms !== null && property.bedrooms !== undefined) && (
-              <div className="flex items-center gap-1.5 p-2 bg-sky-50 rounded-lg border border-sky-200/50">
-                <BedDouble size={16} className="text-sky-600 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-600 leading-tight">Beds</p>
-                  <p className="text-sm font-bold text-gray-900">{property.bedrooms}</p>
+              <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 bg-sky-50 rounded-lg border border-sky-200/50 min-w-0">
+                <BedDouble size={14} className="sm:w-4 sm:h-4 text-sky-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-gray-600 leading-tight">Beds</p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{property.bedrooms}</p>
                 </div>
               </div>
             )}
             {(property.bathrooms !== null && property.bathrooms !== undefined) && (
-              <div className="flex items-center gap-1.5 p-2 bg-cyan-50 rounded-lg border border-cyan-200/50">
-                <Bath size={16} className="text-cyan-600 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-600 leading-tight">Baths</p>
-                  <p className="text-sm font-bold text-gray-900">{property.bathrooms}</p>
+              <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 bg-cyan-50 rounded-lg border border-cyan-200/50 min-w-0">
+                <Bath size={14} className="sm:w-4 sm:h-4 text-cyan-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-gray-600 leading-tight">Baths</p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{property.bathrooms}</p>
                 </div>
               </div>
             )}
             {property.size && (
-              <div className="flex items-center gap-1.5 p-2 bg-teal-50 rounded-lg border border-teal-200/50">
-                <Square size={16} className="text-teal-600 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-600 leading-tight">Size</p>
-                  <p className="text-sm font-bold text-gray-900">{property.size} m²</p>
+              <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 bg-teal-50 rounded-lg border border-teal-200/50 min-w-0">
+                <Square size={14} className="sm:w-4 sm:h-4 text-teal-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-gray-600 leading-tight">Size</p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{property.size} m²</p>
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-1.5 p-2 bg-amber-50 rounded-lg border border-amber-200/50">
-              <Calendar size={16} className="text-amber-600 flex-shrink-0" />
-              <div>
-                <p className="text-xs text-gray-600 leading-tight">Submitted</p>
-                <p className="text-xs font-bold text-gray-900">{formatDate(property.createdAt)}</p>
+            <div className="flex items-center gap-1 sm:gap-1.5 p-1.5 sm:p-2 bg-amber-50 rounded-lg border border-amber-200/50 min-w-0">
+              <Calendar size={14} className="sm:w-4 sm:h-4 text-amber-600 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs text-gray-600 leading-tight">Submitted</p>
+                <p className="text-[10px] sm:text-xs font-bold text-gray-900 truncate">{formatDate(property.createdAt)}</p>
               </div>
             </div>
           </div>
@@ -221,11 +221,11 @@ export default function PropertyCard({
           {isListView && (
             <div className="flex flex-col sm:flex-row gap-2 mb-3">
               {property.address && (
-                <div className="flex items-start gap-2 flex-1">
-                  <MapPin size={16} className="text-purple-600 mt-0.5 flex-shrink-0" />
-                  <div>
+                <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <MapPin size={14} className="sm:w-4 sm:h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-gray-500 mb-0.5">Location</p>
-                    <p className="text-sm text-gray-900 font-medium line-clamp-1">
+                    <p className="text-xs sm:text-sm text-gray-900 font-medium line-clamp-2 break-words">
                       {property.address}
                       {property.district && `, ${property.district}`}
                     </p>
@@ -233,11 +233,11 @@ export default function PropertyCard({
                 </div>
               )}
               {property.contactName && (
-                <div className="flex items-start gap-2">
-                  <User size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div>
+                <div className="flex items-start gap-2 min-w-0 flex-shrink-0">
+                  <User size={14} className="sm:w-4 sm:h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
                     <p className="text-xs text-gray-500 mb-0.5">Owner</p>
-                    <p className="text-sm text-gray-900 font-medium">{property.contactName}</p>
+                    <p className="text-xs sm:text-sm text-gray-900 font-medium truncate">{property.contactName}</p>
                   </div>
                 </div>
               )}
@@ -246,9 +246,9 @@ export default function PropertyCard({
 
           {/* Location - Grid View */}
           {!isListView && property.address && (
-            <div className="flex items-start gap-2 mb-3">
-              <MapPin size={14} className="text-purple-600 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-gray-600 line-clamp-1">
+            <div className="flex items-start gap-2 mb-3 min-w-0">
+              <MapPin size={12} className="sm:w-3.5 sm:h-3.5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-gray-600 line-clamp-2 break-words flex-1">
                 {property.address}
                 {property.district && `, ${property.district}`}
               </p>
@@ -256,7 +256,7 @@ export default function PropertyCard({
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-end gap-2 sm:gap-2.5 pt-3 sm:pt-4 border-t border-gray-100">
             {onViewDetails && (
               <div className="action-btn relative">
                 <Button

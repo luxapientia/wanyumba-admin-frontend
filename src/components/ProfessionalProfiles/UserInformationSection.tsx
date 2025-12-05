@@ -22,24 +22,24 @@ export default function UserInformationSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6"
     >
       <h2 className="text-lg font-bold text-gray-900 mb-4">User Information</h2>
       <div className="space-y-2 text-sm">
-        <div>
+        <div className="break-words">
           <span className="text-gray-500">User ID:</span>
-          <span className="ml-2 text-gray-900 font-mono text-xs">{user.id}</span>
+          <span className="ml-2 text-gray-900 font-mono text-xs break-all">{user.id}</span>
         </div>
         {user.email && (
-          <div>
+          <div className="break-words">
             <span className="text-gray-500">Email:</span>
-            <span className="ml-2 text-gray-900">{user.email}</span>
+            <span className="ml-2 text-gray-900 break-all">{user.email}</span>
           </div>
         )}
         {(user.firstName || user.lastName) && (
-          <div>
+          <div className="break-words">
             <span className="text-gray-500">Name:</span>
-            <span className="ml-2 text-gray-900">
+            <span className="ml-2 text-gray-900 break-words">
               {user.firstName || ''} {user.lastName || ''}
             </span>
           </div>
