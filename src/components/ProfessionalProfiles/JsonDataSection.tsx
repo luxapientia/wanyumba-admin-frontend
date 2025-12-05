@@ -73,13 +73,13 @@ export default function JsonDataSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6"
     >
-      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         {icon}
         {title}
       </h2>
-      <div>{renderJsonField(data)}</div>
+      <div className="overflow-x-auto">{renderJsonField(data)}</div>
     </motion.div>
   );
 }

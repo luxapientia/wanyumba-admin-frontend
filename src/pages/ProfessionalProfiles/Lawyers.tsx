@@ -323,9 +323,9 @@ export default function Lawyers() {
                     className="hover:bg-gray-50/50 transition-colors"
                   >
                     {/* Lawyer Info */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative flex-shrink-0">
                           {profile.professionalPhoto ? (
                             <img
                               src={profile.professionalPhoto}
@@ -345,15 +345,17 @@ export default function Lawyers() {
                             </div>
                           )}
                         </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <div 
+                            className="font-semibold text-gray-900 truncate"
+                            title={profile.user?.firstName || profile.user?.lastName
+                              ? `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()
+                              : profile.user?.email?.split('@')[0] || 'Unknown'}
+                          >
                             {profile.user?.firstName || profile.user?.lastName
                               ? `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()
                               : profile.user?.email?.split('@')[0] || 'Unknown'}
                           </div>
-                          {profile.professionalTitle && (
-                            <div className="text-xs text-gray-500">{profile.professionalTitle}</div>
-                          )}
                         </div>
                       </div>
                     </td>

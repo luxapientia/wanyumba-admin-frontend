@@ -32,9 +32,9 @@ export default function ArrayBadgeSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6"
     >
-      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         {icon}
         {title}
       </h2>
@@ -42,7 +42,7 @@ export default function ArrayBadgeSection({
         {items.map((item, idx) => (
           <span
             key={idx}
-            className={`px-3 py-1 ${badgeColor} rounded-md text-sm font-semibold`}
+            className={`px-2 sm:px-3 py-1 ${badgeColor} rounded-md text-xs sm:text-sm font-semibold break-words`}
           >
             {item}
           </span>

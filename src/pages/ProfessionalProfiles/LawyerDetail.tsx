@@ -132,13 +132,13 @@ export default function LawyerDetail() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
       {/* Back Button */}
       <Button
         onClick={() => navigate('/professional-profiles/lawyers')}
         variant="ghost"
         leftIcon={<ArrowLeft size={18} />}
-        className="mb-4"
+        className="mb-3 sm:mb-4 text-sm sm:text-base"
       >
         Back to Lawyers
       </Button>
@@ -148,13 +148,14 @@ export default function LawyerDetail() {
 
       {/* Approve/Reject Buttons - Only show for PENDING_REVIEW status */}
       {profile.status === 'PENDING_REVIEW' && (
-        <div className="mb-6 flex gap-4 justify-end">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-4 sm:justify-end">
           <Button
             variant="success"
             leftIcon={<CheckCircle size={18} />}
             onClick={handleApproveClick}
             disabled={isProcessing || loading}
             loading={isProcessing}
+            className="w-full sm:w-auto"
           >
             Approve Profile
           </Button>
@@ -163,6 +164,7 @@ export default function LawyerDetail() {
             leftIcon={<X size={18} />}
             onClick={() => setShowRejectModal(true)}
             disabled={isProcessing || loading}
+            className="w-full sm:w-auto"
           >
             Reject Profile
           </Button>
@@ -170,9 +172,9 @@ export default function LawyerDetail() {
       )}
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Bio */}
           <BioSection
             bio={profile.bio}
@@ -374,7 +376,7 @@ export default function LawyerDetail() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* License Information */}
           <LicenseSection
             licenseNumber={profile.licenseNumber}

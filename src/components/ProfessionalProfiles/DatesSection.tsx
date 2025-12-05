@@ -36,7 +36,7 @@ export default function DatesSection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+      className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6"
     >
       <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
         <Calendar size={18} className={iconColor} />
