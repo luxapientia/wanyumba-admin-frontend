@@ -182,6 +182,7 @@ jobs:
           [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] && echo "VITE_SCRAPER_API_URL=${{ secrets.VITE_SCRAPER_API_URL }}" >> .env || true
           [ -n "${{ secrets.VITE_ENABLE_OAUTH }}" ] && echo "VITE_ENABLE_OAUTH=${{ secrets.VITE_ENABLE_OAUTH }}" >> .env || true
           [ -n "${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" ] && echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" >> .env || true
+          [ -n "${{ secrets.VITE_CORS_ORIGIN }}" ] && echo "VITE_CORS_ORIGIN=${{ secrets.VITE_CORS_ORIGIN }}" >> .env || true
           
           echo "✅ Created .env file with environment variables"
           ls -la .env
@@ -353,6 +354,7 @@ jobs:
           [ -n "${{ secrets.VITE_SCRAPER_API_URL }}" ] && echo "VITE_SCRAPER_API_URL=${{ secrets.VITE_SCRAPER_API_URL }}" >> .env || true
           [ -n "${{ secrets.VITE_ENABLE_OAUTH }}" ] && echo "VITE_ENABLE_OAUTH=${{ secrets.VITE_ENABLE_OAUTH }}" >> .env || true
           [ -n "${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" ] && echo "VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}" >> .env || true
+          [ -n "${{ secrets.VITE_CORS_ORIGIN }}" ] && echo "VITE_CORS_ORIGIN=${{ secrets.VITE_CORS_ORIGIN }}" >> .env || true
           
           echo "✅ Created .env file with environment variables"
           ls -la .env
