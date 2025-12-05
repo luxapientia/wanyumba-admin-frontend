@@ -6,4 +6,6 @@ export { default as rolesReducer } from './rolesSlice.js';
 export { default as scrapingReducer } from './scrapingSlice.js';
 export { default as listingsReducer } from './listingsSlice.js';
 export { default as agentsReducer } from './agentsSlice.js';
+export { default as lawyerProfilesReducer } from './lawyerProfilesSlice.js';
+export { default as valuerProfilesReducer } from './valuerProfilesSlice.js';
 

@@ -40,17 +40,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-indigo-500/50 focus:ring-indigo-500/50 active:scale-95',
+        'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500/50 active:scale-95 shadow-sm hover:shadow-md',
       secondary:
-        'bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/50 focus:ring-purple-500/50 active:scale-95',
+        'bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500/50 active:scale-95 shadow-sm hover:shadow-md',
       outline:
         'border-2 border-indigo-500 text-indigo-600 bg-transparent hover:bg-indigo-50 focus:ring-indigo-500/50 active:scale-95',
       ghost:
         'text-gray-700 bg-transparent hover:bg-gray-100 focus:ring-gray-500/50 active:scale-95',
       danger:
-        'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/50 focus:ring-red-500/50 active:scale-95',
+        'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500/50 active:scale-95 shadow-sm hover:shadow-md',
       success:
-        'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-green-500/50 focus:ring-green-500/50 active:scale-95',
+        'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500/50 active:scale-95 shadow-sm hover:shadow-md',
     };
 
     const sizes = {

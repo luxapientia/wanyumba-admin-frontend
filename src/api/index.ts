@@ -3,6 +3,7 @@ export { default as propertiesService } from './properties.service.js';
 export { default as userService } from './user.service.js';
 export { default as scraperService } from './scraper.service.js';
 export { default as dashboardService } from './dashboard.service.js';
+export { default as professionalProfilesService } from './professional-profiles.service.js';
 export type {
   Property,
   PropertyFilters,
@@ -45,4 +46,11 @@ export type {
   DashboardStats,
   DashboardResponse,
 } from './dashboard.service.js';
+export type {
+  LawyerProfile,
+  ValuerProfile,
+  LawyerProfilesResponse,
+  ValuerProfilesResponse,
+  ProfessionalProfilesFilters,
+} from './professional-profiles.service.js';
 

@@ -8,6 +8,7 @@ import { PendingProperties, AllProperties } from './pages/Properties';
 import PropertyDetail from './pages/Properties/PropertyDetail';
 import { Users, UserDetail } from './pages/Users';
 import { ScrapeControl, Listings, Agents, ListingDetail, AgentDetail } from './pages/Scraper';
+import { Lawyers, Valuers, LawyerDetail, ValuerDetail } from './pages/ProfessionalProfiles';
 
 function App() {
   return (
@@ -45,6 +46,15 @@ function App() {
                   <Route path=":id" element={<AgentDetail />} />
                 </Route>
                 <Route index element={<Navigate to="/scraper/scrape" replace />} />
+              </Route>
+              
+              {/* Professional Profiles Routes */}
+              <Route path="professional-profiles">
+                <Route path="lawyers" element={<Lawyers />} />
+                <Route path="lawyers/:id" element={<LawyerDetail />} />
+                <Route path="valuers" element={<Valuers />} />
+                <Route path="valuers/:id" element={<ValuerDetail />} />
+                <Route index element={<Navigate to="/professional-profiles/lawyers" replace />} />
               </Route>
               
               {/* 404 - Redirect to home */}

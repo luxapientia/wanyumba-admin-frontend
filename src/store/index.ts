@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { propertiesReducer, userReducer, usersReducer, rolesReducer, scrapingReducer, listingsReducer, agentsReducer } from './slices/index.js';
+import { propertiesReducer, userReducer, usersReducer, rolesReducer, scrapingReducer, listingsReducer, agentsReducer, lawyerProfilesReducer, valuerProfilesReducer } from './slices/index.js';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +10,8 @@ const store = configureStore({
     scraping: scrapingReducer,
     listings: listingsReducer,
     agents: agentsReducer,
+    lawyerProfiles: lawyerProfilesReducer,
+    valuerProfiles: valuerProfilesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
