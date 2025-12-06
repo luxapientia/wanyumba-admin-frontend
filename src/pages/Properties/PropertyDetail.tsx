@@ -23,7 +23,7 @@ import {
   Shield,
 } from 'lucide-react';
 import Button from '../../components/UI/Button.js';
-import { ConfirmationModal, ScamDetectionModal } from '../../components/UI/index.js';
+import { ConfirmationModal, ScamDetectionModal, Map } from '../../components/UI/index.js';
 import type { ScamDetectionResult } from '../../components/UI/ScamDetectionModal.js';
 import { useToast } from '../../contexts/index.js';
 import { propertiesService } from '../../api/index.js';
@@ -470,9 +470,19 @@ export default function PropertyDetail() {
                   </div>
                 </div>
                 {property.latitude && property.longitude && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    Coordinates: {Number(property.latitude).toFixed(6)}, {Number(property.longitude).toFixed(6)}
-                  </p>
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-500 mb-2">Location Map:</p>
+                    <Map
+                      latitude={Number(property.latitude)}
+                      longitude={Number(property.longitude)}
+                      address={property.address}
+                      title={property.title}
+                      height="300px"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Coordinates: {Number(property.latitude).toFixed(6)}, {Number(property.longitude).toFixed(6)}
+                    </p>
+                  </div>
                 )}
               </div>
 

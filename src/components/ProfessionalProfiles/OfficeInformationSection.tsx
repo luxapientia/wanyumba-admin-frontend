@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Building2, MapPin } from 'lucide-react';
+import { Map } from '../UI';
 
 interface OfficeInformationSectionProps {
   officeName?: string;
@@ -53,11 +54,19 @@ export default function OfficeInformationSection({
             </div>
           </div>
         )}
-        {(officeLatitude || officeLongitude) && (
+        {officeLatitude && officeLongitude && (
           <div>
-            <span className="text-sm text-gray-500">Coordinates:</span>
-            <p className="text-gray-700 font-mono text-sm">
-              {typeof officeLatitude === 'number' ? officeLatitude.toFixed(6) : officeLatitude || 'N/A'}, {typeof officeLongitude === 'number' ? officeLongitude.toFixed(6) : officeLongitude || 'N/A'}
+            <span className="text-sm text-gray-500 mb-2 block">Location Map:</span>
+            <Map
+              latitude={Number(officeLatitude)}
+              longitude={Number(officeLongitude)}
+              address={officeAddress}
+              title={officeName}
+              height="300px"
+              className="mt-2"
+            />
+            <p className="text-gray-500 font-mono text-xs mt-2">
+              {Number(officeLatitude).toFixed(6)}, {Number(officeLongitude).toFixed(6)}
             </p>
           </div>
         )}
