@@ -306,7 +306,7 @@ const ListingDetail = () => {
                     <Map
                       latitude={Number(listing.latitude)}
                       longitude={Number(listing.longitude)}
-                      address={listing.address || `${listing.city || ''}${listing.city && listing.district ? ', ' : ''}${listing.district || ''}`.trim()}
+                      address={listing.addressText || `${listing.city || ''}${listing.city && listing.district ? ', ' : ''}${listing.district || ''}`.trim()}
                       title={listing.title}
                       height="300px"
                     />
