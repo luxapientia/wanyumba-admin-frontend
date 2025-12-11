@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, MapPin, DollarSign, Loader2 } from 'lucide-react';
-import { Button, Badge, AnimatedPage } from '../../components/UI';
+import { Button, Badge, AnimatedPage, Map } from '../../components/UI';
 import { scraperService } from '../../api';
 import type { Listing } from '../../api/scraper.service';
 import { useToast } from '../../contexts/ToastContext';
@@ -299,13 +299,22 @@ const ListingDetail = () => {
                   <InfoRow label="Region" value={listing.region} />
                   <InfoRow label="City" value={listing.city} />
                   <InfoRow label="District" value={listing.district} />
-                  {listing.latitude && listing.longitude && (
-                    <InfoRow 
-                      label="Coordinates" 
-                      value={`${listing.latitude}, ${listing.longitude}`} 
-                    />
-                  )}
                 </dl>
+                {listing.latitude && listing.longitude && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm font-medium text-gray-500 mb-2">Location Map:</p>
+                    <Map
+                      latitude={Number(listing.latitude)}
+                      longitude={Number(listing.longitude)}
+                      address={listing.address || `${listing.city || ''}${listing.city && listing.district ? ', ' : ''}${listing.district || ''}`.trim()}
+                      title={listing.title}
+                      height="300px"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Coordinates: {Number(listing.latitude).toFixed(6)}, {Number(listing.longitude).toFixed(6)}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}

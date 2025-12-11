@@ -9,6 +9,7 @@ export { default as Table } from './Table.js';
 export { default as Input } from './Input.js';
 export { default as Select } from './Select.js';
 export { default as ScamDetectionModal } from './ScamDetectionModal.js';
+export { default as Map } from './Map.js';
 export type { ModalProps } from './Modal.js';
 export type { ConfirmationModalProps } from './ConfirmationModal.js';
 export type { ButtonProps } from './Button.js';
