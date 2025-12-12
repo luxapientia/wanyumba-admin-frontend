@@ -6,6 +6,7 @@ export interface Property {
   description?: string;
   propertyType: string;
   listingType: 'sale' | 'rent';
+  rentalType?: string; // residential, short-term, holiday (only for rent listings)
   status: 'DRAFT' | 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SOLD' | 'RENTED';
   price: number;
   currency: string;

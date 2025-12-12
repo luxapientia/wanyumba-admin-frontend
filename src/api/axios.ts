@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 // API base URL - can be configured via environment variable
-// Default to admin microservice URL (port 3005)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api/v1';
+// IMPORTANT: All API calls go through the API Gateway (Traefik)
+// Default to Traefik gateway URL (port 80)
+// Traefik routes /api/v1/admin/* to admin service (port 3005)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost/api/v1';
 
 // Wanyumba frontend URL for redirecting unauthorized users
 const WANYUMBA_FRONTEND_URL = import.meta.env.VITE_WANYUMBA_FRONTEND_URL || 'http://localhost:8080';

@@ -418,7 +418,10 @@ export default function PropertyDetail() {
               <div className="mb-6 pb-6 border-b border-gray-200">
                 <p className="text-sm text-gray-500 mb-1">Price</p>
                 <p className="text-3xl font-bold text-gray-900">{formatPrice(property.price, property.currency)}</p>
-                <p className="text-sm text-gray-600 mt-1 capitalize">{property.listingType}</p>
+                <p className="text-sm text-gray-600 mt-1 capitalize">
+                  {property.listingType}
+                  {property.rentalType && property.listingType === 'rent' && ` - ${property.rentalType}`}
+                </p>
               </div>
 
               {/* Property Stats */}
