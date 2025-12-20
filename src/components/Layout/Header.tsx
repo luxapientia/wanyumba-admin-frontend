@@ -161,6 +161,17 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
     return user.email.split('@')[0];
   };
 
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return 'AU';
+    if (user.firstName || user.lastName) {
+      const first = user.firstName?.charAt(0).toUpperCase() || '';
+      const last = user.lastName?.charAt(0).toUpperCase() || '';
+      return (first + last) || user.email.charAt(0).toUpperCase();
+    }
+    return user.email.charAt(0).toUpperCase();
+  };
+
   // Get user role display
   const getUserRoleDisplay = () => {
     if (!user || !user.roles || user.roles.length === 0) return 'Administrator';
@@ -296,7 +307,9 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
                             ease: 'linear',
                           }}
                         />
-                        <User size={18} className="text-white relative z-10" />
+                        <span className="text-white text-sm font-semibold relative z-10">
+                          {getUserInitials()}
+                        </span>
                       </>
                     )}
                   </motion.div>
@@ -479,7 +492,9 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
-                      <UserCircle size={24} className="text-white" />
+                      <span className="text-white text-sm font-semibold">
+                        {getUserInitials()}
+                      </span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -667,7 +682,9 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <User size={20} className="text-white" />
+                          <span className="text-white text-xs font-semibold">
+                            {getUserInitials()}
+                          </span>
                         )}
                       </motion.div>
                       <div className="flex-1 min-w-0">

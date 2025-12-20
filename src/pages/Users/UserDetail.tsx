@@ -21,6 +21,7 @@ import Button from '../../components/UI/Button.js';
 import { useToast } from '../../contexts/index.js';
 import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
 import { updateUser, updateUserRoles } from '../../store/thunks/usersThunks.js';
+import { setUser as setCurrentUser } from '../../store/slices/userSlice.js';
 import userService from '../../api/user.service.js';
 import type { User, UpdateUserDto } from '../../api/index.js';
 
@@ -30,6 +31,7 @@ export default function UserDetail() {
   const toast = useToast();
   const dispatch = useAppDispatch();
   const { items: availableRoles } = useAppSelector((state) => state.roles);
+  const currentUser = useAppSelector((state) => state.user.user);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,18 +217,37 @@ export default function UserDetail() {
       const currentRoleNames = user.roles || [];
       const rolesChanged = JSON.stringify([...currentRoleNames].sort()) !== JSON.stringify([...selectedRoles].sort());
       
+      let finalUser: User;
       if (rolesChanged) {
         const updatedUser = await dispatch(updateUserRoles({ userId: id, roles: selectedRoles })).unwrap();
-        setUser(updatedUser);
-        setSelectedRoles(updatedUser.roles || []);
+        // If we also updated other fields, merge the results
+        if (Object.keys(updateData).length > 0) {
+          finalUser = { ...result, ...updatedUser, roles: updatedUser.roles };
+        } else {
+          finalUser = updatedUser;
+        }
+        setUser(finalUser);
+        setSelectedRoles(finalUser.roles || []);
       } else {
+        finalUser = result;
         setUser(result);
         setSelectedRoles(result.roles || []);
       }
       
+      // If the updated user is the current logged-in user, update the current user state
+      if (currentUser && currentUser.id === id) {
+        dispatch(setCurrentUser(finalUser));
+      }
+      
       setIsEditing(false);
       setValidationErrors({});
-      toast?.success('User Updated', 'User information has been updated successfully.');
+      
+      // Show toast message
+      if (toast) {
+        toast.success('User Updated', 'User information has been updated successfully.');
+      } else {
+        console.log('User Updated: User information has been updated successfully.');
+      }
     } catch (error: unknown) {
       let errorMessage = 'Failed to update user';
       if (error && typeof error === 'object') {
