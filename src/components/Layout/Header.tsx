@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, User, Home, Shield, LogOut, Menu, X, ChevronDown, Mail, Phone, UserCircle, Bot, Briefcase } from 'lucide-react';
+import { Bell, User, Home, Shield, LogOut, Menu, X, ChevronDown, Mail, Phone, Bot, Briefcase } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
 import { fetchCurrentUser } from '../../store/thunks/userThunks.js';
