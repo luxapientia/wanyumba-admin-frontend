@@ -145,7 +145,7 @@ export const ChatWindow = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-20 right-6 w-[90vw] sm:w-[28rem] h-[32rem] sm:h-[35rem] bg-white border-2 border-gray-200 rounded-2xl shadow-2xl flex flex-col z-50">
+    <div className="fixed bottom-3 right-3 w-[90vw] sm:w-[28rem] h-[32rem] sm:h-[35rem] bg-white border-2 border-gray-200 rounded-2xl shadow-2xl flex flex-col z-50">
       <div className="flex items-center justify-between p-4 border-b-2 border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-2xl">
         <div>
           <h2 className="text-lg font-bold text-gray-900">AI Butler</h2>
