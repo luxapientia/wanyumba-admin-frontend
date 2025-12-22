@@ -1,10 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, User, Home, Shield, LogOut, Menu, X, ChevronDown, Mail, Phone, Bot, Briefcase } from 'lucide-react';
+import { User, Home, Shield, X, ChevronDown, Bot, Briefcase, Menu } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
-import { fetchCurrentUser } from '../../store/thunks/userThunks.js';
 import Button from '../UI/Button.js';
 
 interface HeaderProps {
@@ -24,20 +22,9 @@ interface NavItem {
 
 const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
   const location = useLocation();
-  const dispatch = useAppDispatch();
-  const { user, loading: userLoading } = useAppSelector((state) => state.user);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [userMenuPosition, setUserMenuPosition] = useState({ top: 0, right: 0 });
   const submenuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
-  // Fetch user info on mount
-  useEffect(() => {
-    if (!user && !userLoading) {
-      dispatch(fetchCurrentUser());
-    }
-  }, [dispatch, user, userLoading]);
 
   const navItems: NavItem[] = [
     {
@@ -100,33 +87,6 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
     setOpenSubmenu(openSubmenu === path ? null : path);
   };
 
-  // Update user menu position when opened or window resizes/scrolls
-  useEffect(() => {
-    if (!userMenuOpen || !userMenuRef.current) return;
-
-    const updatePosition = () => {
-      if (userMenuRef.current) {
-        const rect = userMenuRef.current.getBoundingClientRect();
-        setUserMenuPosition({
-          top: rect.bottom + 8,
-          right: window.innerWidth - rect.right,
-        });
-      }
-    };
-
-    // Initial position
-    updatePosition();
-
-    // Update on scroll and resize
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
-
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [userMenuOpen]);
-
   // Close submenu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -134,13 +94,9 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
       if (openSubmenu && !target.closest('.submenu-container')) {
         setOpenSubmenu(null);
       }
-      // Check if click is outside user menu (portal renders to body, so check by class)
-      if (userMenuOpen && !target.closest('[data-user-menu]') && !target.closest('[data-user-menu-trigger]')) {
-        setUserMenuOpen(false);
-      }
     };
 
-    if (openSubmenu || userMenuOpen) {
+    if (openSubmenu) {
       const timer = setTimeout(() => {
         document.addEventListener('click', handleClickOutside);
       }, 100);
@@ -150,34 +106,8 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
         document.removeEventListener('click', handleClickOutside);
       };
     }
-  }, [openSubmenu, userMenuOpen]);
+  }, [openSubmenu]);
 
-  // Get user display name
-  const getUserDisplayName = () => {
-    if (!user) return 'Admin User';
-    if (user.firstName || user.lastName) {
-      return `${user.firstName || ''} ${user.lastName || ''}`.trim();
-    }
-    return user.email.split('@')[0];
-  };
-
-  // Get user initials for avatar
-  const getUserInitials = () => {
-    if (!user) return 'AU';
-    if (user.firstName || user.lastName) {
-      const first = user.firstName?.charAt(0).toUpperCase() || '';
-      const last = user.lastName?.charAt(0).toUpperCase() || '';
-      return (first + last) || user.email.charAt(0).toUpperCase();
-    }
-    return user.email.charAt(0).toUpperCase();
-  };
-
-  // Get user role display
-  const getUserRoleDisplay = () => {
-    if (!user || !user.roles || user.roles.length === 0) return 'Administrator';
-    const role = user.roles[0];
-    return role.charAt(0).toUpperCase() + role.slice(1);
-  };
 
   // Get dropdown position
   const getDropdownPosition = (path: string) => {
@@ -195,151 +125,19 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
     <>
       <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 shadow-sm">
         <div className="max-w-full mx-auto">
-          {/* Top Bar - Logo and User Actions */}
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-gray-100 bg-white/95 backdrop-blur-md">
-            {/* Left Side - Menu Button (Mobile) and Logo */}
-            <div className="flex items-center gap-3">
+          {/* Horizontal Navigation Menu */}
+          <nav className="px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-gray-50/80 via-indigo-50/30 to-purple-50/30 backdrop-blur-sm">
+            <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar">
               {/* Mobile Menu Button */}
               <Button
                 onClick={onMenuClick}
                 variant="ghost"
                 size="sm"
-                className="lg:hidden p-2.5"
+                className="lg:hidden p-2.5 mr-2"
                 aria-label="Toggle menu"
               >
                 <Menu size={22} className="text-gray-700" />
               </Button>
-
-              {/* Logo */}
-              <div className="flex items-center gap-3">
-                <motion.div
-                  className="w-11 h-11 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden"
-                  whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{
-                      x: ['-100%', '100%'],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatDelay: 2,
-                      ease: 'linear',
-                    }}
-                  />
-                  <Shield size={24} className="text-white relative z-10" />
-                </motion.div>
-                <div className="hidden sm:block">
-                  <motion.h1
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-lg font-bold bg-gradient-to-r from-gray-900 to-indigo-800 bg-clip-text text-transparent"
-                  >
-                    Wanyumba Admin
-                  </motion.h1>
-                  <p className="text-xs text-gray-500 font-medium">Administration Panel</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Notifications */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative p-2.5 rounded-xl hover:bg-indigo-50"
-                  aria-label="Notifications"
-                >
-                  <Bell size={20} className="text-gray-600" />
-                  <motion.span
-                    className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full ring-2 ring-white shadow-lg"
-                    animate={{
-                      scale: [1, 1.3, 1],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                </Button>
-              </motion.div>
-
-              {/* User Profile Menu */}
-              <div className="relative pl-3 border-l border-gray-200" ref={userMenuRef} data-user-menu-trigger>
-                <motion.div
-                  className="flex items-center gap-2 sm:gap-3 cursor-pointer"
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                >
-                  <div className="text-right hidden sm:block">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {userLoading ? 'Loading...' : getUserDisplayName()}
-                    </p>
-                    <p className="text-xs text-gray-500">{getUserRoleDisplay()}</p>
-                  </div>
-                  <motion.div
-                    className="relative w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center ring-2 ring-indigo-100 shadow-md overflow-hidden"
-                    whileHover={{ scale: 1.1, rotate: [0, 5, -5, 0] }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {user?.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt={getUserDisplayName()}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <>
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                          animate={{
-                            x: ['-100%', '100%'],
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            repeatDelay: 1,
-                            ease: 'linear',
-                          }}
-                        />
-                        <span className="text-white text-sm font-semibold relative z-10">
-                          {getUserInitials()}
-                        </span>
-                      </>
-                    )}
-                  </motion.div>
-                  <ChevronDown
-                    size={16}
-                    className={`text-gray-500 hidden sm:block transition-transform duration-200 ${
-                      userMenuOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </motion.div>
-
-              </div>
-
-              {/* Logout */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-2.5 rounded-xl text-gray-600 hover:text-red-600 hover:bg-red-50 hidden sm:flex"
-                  aria-label="Logout"
-                >
-                  <LogOut size={18} />
-                </Button>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Horizontal Navigation Menu - Desktop */}
-          <nav className="hidden lg:block px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-gray-50/80 via-indigo-50/30 to-purple-50/30 backdrop-blur-sm">
-            <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = isItemActive(item.path) || hasActiveSubmenu(item);
@@ -464,98 +262,6 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
         </div>
       </header>
 
-      {/* User Menu Dropdown Portal - Rendered outside header to avoid z-index issues */}
-      {typeof document !== 'undefined' && userMenuOpen && createPortal(
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed w-72 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
-            data-user-menu
-            style={{
-              top: `${userMenuPosition.top}px`,
-              right: `${userMenuPosition.right}px`,
-              zIndex: 10000,
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-              {/* User Info Header */}
-              <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center ring-2 ring-white/30">
-                    {user?.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt={getUserDisplayName()}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <span className="text-white text-sm font-semibold">
-                        {getUserInitials()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">
-                      {getUserDisplayName()}
-                    </p>
-                    <p className="text-xs text-indigo-100 truncate">{user?.email}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* User Details */}
-              <div className="p-3 space-y-1">
-                {user?.phone && (
-                  <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-50">
-                    <Phone size={16} className="text-gray-400" />
-                    <span>{user.phone}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-50">
-                  <Mail size={16} className="text-gray-400" />
-                  <span className="truncate">{user?.email}</span>
-                </div>
-                {user?.roles && user.roles.length > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 rounded-lg">
-                    <Shield size={16} className="text-gray-400" />
-                    <div className="flex flex-wrap gap-1">
-                      {user.roles.map((role) => (
-                        <span
-                          key={role}
-                          className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-md"
-                        >
-                          {role}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Menu Actions */}
-              <div className="border-t border-gray-200 p-2">
-                <Button
-                  onClick={() => {
-                    setUserMenuOpen(false);
-                    // TODO: Implement logout
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-red-600 hover:bg-red-50"
-                  leftIcon={<LogOut size={18} />}
-                >
-                  Logout
-                </Button>
-              </div>
-            </motion.div>
-          </AnimatePresence>,
-          document.body
-        )
-      }
-
       {/* Submenu Dropdown Portal - Rendered outside header to avoid overflow issues */}
       {typeof document !== 'undefined' && openSubmenu && (() => {
         const item = navItems.find(i => i.path === openSubmenu && i.submenus);
@@ -662,39 +368,6 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
                       <X size={22} className="text-white" />
                     </Button>
                   </div>
-
-                  {/* User Info Card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20"
-                  >
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        className="w-10 h-10 bg-gradient-to-br from-white/30 to-white/10 rounded-full flex items-center justify-center ring-2 ring-white/30 overflow-hidden"
-                        whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                      >
-                        {user?.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={getUserDisplayName()}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-white text-xs font-semibold">
-                            {getUserInitials()}
-                          </span>
-                        )}
-                      </motion.div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">
-                          {userLoading ? 'Loading...' : getUserDisplayName()}
-                        </p>
-                        <p className="text-xs text-indigo-100 truncate">{getUserRoleDisplay()}</p>
-                      </div>
-                    </div>
-                  </motion.div>
                 </div>
               </div>
 
@@ -844,17 +517,7 @@ const Header = ({ onMenuClick, isDrawerOpen, onCloseDrawer }: HeaderProps) => {
 
               {/* Drawer Footer */}
               <div className="p-4 border-t border-gray-200 bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30">
-                <Button
-                  variant="danger"
-                  size="lg"
-                  fullWidth
-                  className="bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 text-red-600 border border-red-200/50"
-                  leftIcon={<LogOut size={20} />}
-                >
-                  Logout
-                </Button>
-
-                <div className="mt-4 text-center">
+                <div className="text-center">
                   <p className="text-xs text-gray-500 font-medium">Version 1.0.0</p>
                   <p className="text-xs text-gray-400 mt-1">© 2024 Wanyumba</p>
                 </div>
