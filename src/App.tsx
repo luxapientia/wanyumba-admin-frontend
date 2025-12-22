@@ -9,6 +9,7 @@ import PropertyDetail from './pages/Properties/PropertyDetail';
 import { Users, UserDetail } from './pages/Users';
 import { ScrapeControl, Listings, Agents, ListingDetail, AgentDetail } from './pages/Scraper';
 import { Lawyers, Valuers, LawyerDetail, ValuerDetail } from './pages/ProfessionalProfiles';
+import { ChatButton } from './components/Chat/ChatButton';
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
             </Route>
           </Routes>
           <ToastContainer />
+          <ChatButton />
         </BrowserRouter>
       </ToastProvider>
     </WebSocketProvider>
