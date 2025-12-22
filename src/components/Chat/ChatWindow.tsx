@@ -45,7 +45,7 @@ export const ChatWindow = ({
       setLoading(true);
       const history = await chatService.getHistory(conversationId);
       setMessages(history);
-    } catch (error) {
+    } catch (_error) {
       showError('Failed to Load History', 'Could not load conversation history');
     } finally {
       setLoading(false);
@@ -110,7 +110,7 @@ export const ChatWindow = ({
       setMessages((prev) =>
         prev.map((msg) => (msg.id === loadingMessage.id ? assistantMessage : msg))
       );
-    } catch (error) {
+    } catch (_error) {
       setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessage.id));
       showError('Failed to Send Message', 'Could not send your message. Please try again.');
     } finally {
@@ -130,7 +130,7 @@ export const ChatWindow = ({
       setMessages([]);
       setConversationId(undefined);
       success('Conversation Cleared', 'Chat history has been cleared');
-    } catch (error) {
+    } catch (_error) {
       showError('Failed to Clear', 'Could not clear conversation history');
     }
   };
